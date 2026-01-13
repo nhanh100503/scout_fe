@@ -1,0 +1,335 @@
+<template>
+    <div class="flex flex-col h-full overflow-y-auto">
+        <div class="max-w-4xl mx-auto w-full p-6 flex-1 flex flex-col">
+            <h2 class="text-xl font-semibold mb-4 text-emerald-700">Tạo đoàn sinh mới</h2>
+            <form class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
+                <div class="flex-1 overflow-y-auto space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Châu <span class="text-red-500">*
+                                </span></label>
+                            <select v-model="form.deaneryId" :class="inputClass(errors.deaneryId)">
+                                <option value="">-- Chọn châu --</option>
+                                <option v-for="item in deaneries" :key="item.deaneryId" :value="item.deaneryId">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                            <p v-if="errors.deaneryId" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.deaneryId }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Đạo <span class="text-red-500">*
+                                </span></label>
+                            <input v-model="form.parish" type="text" :class="inputClass(errors.parish)" />
+                            <p v-if="errors.parish" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.parish }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Liên đoàn <span
+                                    class="text-red-500">*
+                                </span></label>
+                            <input v-model="form.federation" type="text" :class="inputClass(errors.federation)" />
+                            <p v-if="errors.federation" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.federation }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Đoàn <span class="text-red-500">*
+                                </span></label>
+                            <input v-model="form.team" type="text" :class="inputClass(errors.team)" />
+                            <p v-if="errors.team" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.team }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Họ và tên <span
+                                    class="text-red-500">*
+                                </span></label>
+                            <input v-model="form.name" type="text" :class="inputClass(errors.name)" />
+                            <p v-if="errors.name" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.name }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Giới tính <span
+                                    class="text-red-500">*
+                                </span></label>
+                            <select v-model="form.genderId" :class="inputClass(errors.genderId)">
+                                <option value="">-- Chọn giới tính --</option>
+                                <option v-for="item in genders" :key="item.genderId" :value="item.genderId">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                            <p v-if="errors.genderId" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.genderId }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Ngày sinh <span
+                                    class="text-red-500">*
+                                </span></label>
+                            <input v-model="form.birthday" type="date" :class="inputClass(errors.birthday)" />
+                            <p v-if="errors.birthday" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.birthday }}
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Tôn giáo <span class="text-red-500">*
+                            </span></label>
+                        <select v-model="form.religionId" :class="inputClass(errors.religionId)">
+                            <option value="">-- Chọn tôn giáo --</option>
+                            <option v-for="item in religions" :key="item.religionId" :value="item.religionId">
+                                {{ item.name }}
+                            </option>
+                        </select>
+                        <p v-if="errors.religionId" class="mt-1 text-xs text-red-500 break-words">
+                            {{ errors.religionId }}
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Năm bắt đầu sinh hoạt <span
+                                    class="text-red-500">*
+                                </span></label>
+                            <input v-model="form.startYear" type="text" :class="inputClass(errors.startYear)" />
+                            <p v-if="errors.startYear" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.startYear }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Năm tuyên hứa <span
+                                    class="text-red-500">*
+                                </span></label>
+                            <input v-model="form.pledgeYear" type="text" :class="inputClass(errors.pledgeYear)" />
+                            <p v-if="errors.pledgeYear" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.pledgeYear }}
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Đã từng là đoàn sinh các ngành <span
+                                class="text-red-500">*
+                            </span></label>
+                        <div class="flex flex-wrap gap-4 mt-2">
+                            <label v-for="item in majors" :key="item.majorId">
+                                <input type="checkbox" :value="item.majorId" v-model="selectedPastMajors" />
+                                {{ item.name }}
+                            </label>
+                            <p v-if="errors.majors" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.majors }}
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Ngành đang sinh hoạt <span
+                                class="text-red-500">*
+                            </span></label>
+                        <select v-model="currentMajorId"
+                            class="mt-1 w-full border border-gray-300 rounded-md px-3 py-2">
+                            <option value="null">-- Chọn ngành hiện tại --</option>
+                            <option v-for="item in majors" :key="item.majorId" :value="item.majorId">
+                                {{ item.name }}
+                            </option>
+                            <p v-if="errors.currentMajorId" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.currentMajorId }}
+                            </p>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Trách vụ <span class="text-red-500">*
+                                </span></label>
+                            <select v-model="form.responsibilityId" :class="inputClass(errors.responsibilityId)">
+                                <option value="">-- Chọn trách vụ --</option>
+                                <option v-for="item in responsibilities" :key="item.responsibilityId"
+                                    :value="item.responsibilityId">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                            <p v-if="errors.responsibilityId" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.responsibilityId }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Đẳng thứ <span class="text-red-500">*
+                                </span></label>
+                            <select v-model="form.rankId" :class="inputClass(errors.rankId)">
+                                <option value="">-- Chọn --</option>
+                                <option v-for="item in ranks" :key="item.rankId" :value="item.rankId">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                            <p v-if="errors.rankId" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.rankId }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-4">
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">
+                        Lưu đoàn sinh
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+import { ReligionDto } from "@/types/religion.type";
+import { getAllDeanery } from "@/services/deaneryService";
+import { getAllReligion } from "@/services/religionService";
+import { MajorDto } from "@/types/major.type";
+import { getAllMajor } from "@/services/majorService";
+import { RankDto } from "@/types/rank.type";
+import { getAllRanksTypeFalse } from "@/services/rankService";
+import { ResponsibilityDto } from "@/types/responsibility.type";
+import { watch } from "vue";
+import { getAllResponsibilitiesDSByMajorId } from "@/services/responsibilityService";
+import { GenderDto } from "@/types/gender.type";
+import { getAllGenders } from "@/services/genderService";
+import { MemberRoleDSCreateRequest, ValidationErrorMember } from "@/types/member.type";
+import { createMemberRoleDS } from "@/services/memberService";
+import { DeaneryDto } from "@/types/deanery.type";
+import { ApiResponse } from "@/types/api.type";
+import router from "@/routers";
+import { useToast } from "@/composables/useToast";
+import { inputClass } from "@/utils/inputClass";
+const form = ref<MemberRoleDSCreateRequest>({
+    name: "",
+    birthday: "",
+    startYear: "",
+    pledgeYear: "",
+    parish: "",
+    federation: "",
+    team: "",
+    deaneryId: null,
+    genderId: null,
+    rankId: null,
+    roleId: 1,
+    religionId: null,
+    responsibilityId: null,
+    majors: []
+});
+
+const deaneries = ref<DeaneryDto[]>([]);
+const religions = ref<ReligionDto[]>([]);
+const majors = ref<MajorDto[]>([]);
+const ranks = ref<RankDto[]>([])
+const responsibilities = ref<ResponsibilityDto[]>([]);
+const genders = ref<GenderDto[]>([])
+const errors = ref<ValidationErrorMember>({});
+const selectedPastMajors = ref<number[]>([]);
+const currentMajorId = ref<number | "">("");
+const { toast, showToast } = useToast();
+
+
+onMounted(async () => {
+    try {
+        const resDeaneries = await getAllDeanery();
+        deaneries.value = resDeaneries.data;
+
+        const resReligions = await getAllReligion();
+        religions.value = resReligions.data;
+
+        const resMajor = await getAllMajor();
+        majors.value = resMajor.data;
+
+        const resRank = await getAllRanksTypeFalse();
+        ranks.value = resRank.data;
+
+        const resGender = await getAllGenders();
+        genders.value = resGender.data;
+    } catch (error) {
+        showToast(error, "error");
+    }
+});
+
+watch(selectedPastMajors, (newVal) => {
+    const current = form.value.majors.find(m => m.now);
+    form.value.majors = current ? [current] : [];
+    newVal.forEach(id => {
+        if (current && current.majorId === id) return;
+        const major = majors.value.find(m => m.majorId === id);
+        form.value.majors.push({
+            majorId: id,
+            name: major ? major.name : "",
+            now: false
+        });
+    });
+});
+
+watch(currentMajorId, async (newMajorId) => {
+    form.value.majors = form.value.majors.filter(m => !m.now);
+    if (newMajorId) {
+        const major = majors.value.find(m => m.majorId === newMajorId);
+        const existing = form.value.majors.find(m => m.majorId === Number(newMajorId));
+        if (existing) {
+            existing.now = true;
+        } else {
+            form.value.majors.push({
+                majorId: Number(newMajorId),
+                name: major ? major.name : "",
+                now: true
+            });
+        }
+        try {
+            const res = await getAllResponsibilitiesDSByMajorId(Number(newMajorId));
+            responsibilities.value = res.data;
+            console.log(responsibilities.value);
+        } catch (error) {
+            responsibilities.value = [];
+        }
+    } else {
+        responsibilities.value = [];
+        form.value.responsibilityId = 0;
+    }
+});
+
+async function handleSubmit() {
+    errors.value = {};
+
+    const birthdayYear = form.value.birthday ? new Date(form.value.birthday).getFullYear() : null;
+    if (form.value.startYear) {
+        if (!/^\d{4}$/.test(String(form.value.startYear))) {
+            errors.value.startYear = "Năm bắt đầu phải gồm 4 chữ số";
+            return;
+        }
+        if (birthdayYear && Number(form.value.startYear) < birthdayYear) {
+            errors.value.startYear = "Năm bắt đầu không được nhỏ hơn năm sinh";
+            return;
+        }
+    }
+
+    if (form.value.pledgeYear) {
+        if (!/^\d{4}$/.test(String(form.value.pledgeYear))) {
+            errors.value.pledgeYear = "Năm tuyên hứa phải gồm 4 chữ số";
+            return;
+        }
+        if (birthdayYear && Number(form.value.pledgeYear) < birthdayYear) {
+            errors.value.pledgeYear = "Năm tuyên hứa không được nhỏ hơn năm sinh";
+            return;
+        }
+    }
+    try {
+        const res = await createMemberRoleDS(form.value);
+        if (res.code === 201) {
+            showToast(res.message, "success")
+            router.push("/members/ds");
+        }
+    } catch (error: any) {
+        const apiRes: ApiResponse<any> = error;
+        if (apiRes.code === 400 && apiRes.data) {
+            errors.value = apiRes.data as ValidationErrorMember;
+        }
+        showToast(apiRes.message, "error");
+    }
+}
+
+</script>
