@@ -114,14 +114,21 @@ import ResetPasswordView from '@/views/auth/ResetPasswordView.vue'
 
 router.beforeEach((to, from, next) => {
     const token = getLS("accessToken");
+
     if (!token && to.name !== "login") {
         return next({ name: "login" });
     }
+
+    if (token && to.name === "login") {
+        return next({ name: "home" });
+    }
+
     const { currentMember } = useAuth();
     if (to.meta?.roles) {
         const requiredRoles = to.meta.roles as string[];
         const userRole = currentMember.value?.role?.name;
-        if (!requiredRoles.includes(userRole || "")) {
+        
+        if (!userRole || !requiredRoles.includes(userRole)) {
             return next({ name: "home" });
         }
     }
