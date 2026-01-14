@@ -16,3 +16,8 @@ export type ValidationLoginErrors = {
     email?: string;
     password?: string;
 };
+
+export type ValidationResetPasswordErrors = {
+    currentPassword?: string;
+    password?: string;
+};
