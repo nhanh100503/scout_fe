@@ -99,6 +99,7 @@ const routes = [
             { path: ROUTER_PATHS.ADD_ATTENDANCE, name: 'addAttendance', component: CreateAttendance },
 
             { path: ROUTER_PATHS.LIST_RESPONSIBILITY, name: 'ListResponsibility', component: ListResponsibility },
+            { path: ROUTER_PATHS.RESET_PASSWORD, name: 'resetPassword', component: ResetPasswordView },
         ],
     },
 ]
@@ -109,6 +110,7 @@ const router = createRouter({
 })
 
 import { useAuth } from "@/composables/useAuth";
+import ResetPasswordView from '@/views/auth/ResetPasswordView.vue'
 
 router.beforeEach((to, from, next) => {
     const token = getLS("accessToken");

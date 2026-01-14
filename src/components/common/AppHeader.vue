@@ -73,6 +73,17 @@
                             </a>
                         </li>
                         <li>
+                            <a href="/reset-password"
+                                class="flex items-center gap-2 px-4 py-2 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15 7a3 3 0 00-6 0v3H7a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-2V7z" />
+                                </svg>
+                                Đổi mật khẩu
+                            </a>
+                        </li>
+                        <li>
                             <button @click="handleLogout"
                                 class="flex items-center gap-2 w-full text-left px-4 py-2 hover:bg-red-50 hover:text-red-600 transition-colors">
                                 <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" stroke-width="2"

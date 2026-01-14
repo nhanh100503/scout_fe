@@ -3,6 +3,11 @@ export interface AuthLoginRequest {
     password: string;
 }
 
+export interface ResetPasswordRequest {
+    currentPassword: string;
+    password: string;
+}
+
 export interface AuthResponse {
     accessToken: string;
 }
