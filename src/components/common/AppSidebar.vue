@@ -19,7 +19,7 @@
                 </svg>
             </button>
         </div>
-        <nav class="px-3 py-3">
+        <nav class="px-3 py-3" @click="handleNavClick">
             <ul class="space-y-1">
                 <li>
                     <RouterLink to="/"
@@ -155,10 +155,24 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ isOpen: boolean }>()
-defineEmits<{ (e: 'close'): void }>()
 import { useAuth } from "@/composables/useAuth";
 const { currentMember } = useAuth();
+
+// Định nghĩa Props và Emits
+defineProps<{ isOpen: boolean }>()
+const emit = defineEmits<{ (e: 'close'): void }>()
+
+/**
+ * Xử lý khi click vào thanh điều hướng
+ * Sử dụng Event Delegation để tránh gắn quá nhiều @click vào từng RouterLink
+ */
+function handleNavClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    // Nếu click vào thẻ <a> hoặc bất kỳ phần tử con nào bên trong RouterLink
+    if (target.closest('a')) {
+        emit('close');
+    }
+}
 </script>
 
 <style scoped>
