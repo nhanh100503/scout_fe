@@ -26,6 +26,7 @@ onMounted(async () => {
       const userRes = await getCurrentMember();
       console.log("Current Member Response:", userRes);
       if (userRes.data) {
+        console.log("Setting member with roles:", userRes.data.roles);
         setMember(userRes.data);
       }
     } catch (e) {

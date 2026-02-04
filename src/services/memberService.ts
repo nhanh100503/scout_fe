@@ -52,3 +52,19 @@ export async function countMember(roleName: string): Promise<ApiResponse<number>
     const res: AxiosResponse<ApiResponse<number>> = await apiClient.get(`/statistics/count/${roleName}`);
     return res.data;
 }
+
+export async function uploadAvatar(memberId: number, file: File): Promise<ApiResponse<MemberDto>> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const res: AxiosResponse<ApiResponse<MemberDto>> = await apiClient.post(
+        `/members/${memberId}/avatar`,
+        formData,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        }
+    );
+    return res.data;
+}
