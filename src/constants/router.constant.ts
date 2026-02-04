@@ -2,6 +2,8 @@ export const ROUTER_PATHS = {
     HOME: '/',
     LOGIN: '/login',
     RESET_PASSWORD: '/reset-password',
+    PROFILE: '/profile',
+
 
     MEMBERS_DS: '/members/ds',
     ADD_MEMBER_DS: '/members/add/ds',

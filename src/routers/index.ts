@@ -40,6 +40,8 @@ import ListUser from '@/views/user/ListUser.vue'
 import CreateUser from '@/views/user/CreateUser.vue'
 import DetailUser from '@/views/user/DetailUser.vue'
 import UpdateUser from '@/views/user/UpdateUser.vue'
+import Profile from '@/views/Profile.vue'
+
 
 const routes = [
     {
@@ -100,6 +102,7 @@ const routes = [
 
             { path: ROUTER_PATHS.LIST_RESPONSIBILITY, name: 'ListResponsibility', component: ListResponsibility },
             { path: ROUTER_PATHS.RESET_PASSWORD, name: 'resetPassword', component: ResetPasswordView },
+            { path: ROUTER_PATHS.PROFILE, name: 'profile', component: Profile },
         ],
     },
 ]
@@ -111,8 +114,10 @@ const router = createRouter({
 
 import { useAuth } from "@/composables/useAuth";
 import ResetPasswordView from '@/views/auth/ResetPasswordView.vue'
+import { getCurrentMember } from '@/services/authService';
+import { removeLS } from '@/tools/localStorage.tool'
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const token = getLS("accessToken");
 
     if (!token && to.name !== "login") {
@@ -123,12 +128,28 @@ router.beforeEach((to, from, next) => {
         return next({ name: "home" });
     }
 
-    const { currentMember } = useAuth();
+    const { currentMember, setMember } = useAuth();
+
+    if (token && !currentMember.value) {
+        try {
+            const response = await getCurrentMember();
+            if (response.data) {
+                setMember(response.data);
+            }
+        } catch (error) {
+            removeLS("accessToken");
+            return next({ name: "login" });
+        }
+    }
+
     if (to.meta?.roles) {
         const requiredRoles = to.meta.roles as string[];
-        const userRole = currentMember.value?.role?.name;
-        
-        if (!userRole || !requiredRoles.includes(userRole)) {
+        const userRoles = currentMember.value?.roles?.map(r => r.name) || [];
+
+        // Check if user has at least one of the required roles
+        const hasRequiredRole = userRoles.some(role => requiredRoles.includes(role));
+
+        if (!hasRequiredRole) {
             return next({ name: "home" });
         }
     }

@@ -40,17 +40,21 @@
                 </button>
                 <div class="flex items-center gap-3 pl-2 border-l border-gray-200 cursor-pointer"
                     @click="toggleDropdown">
-                    <img src="@/assets/avatar.png" alt="avatar" class="w-9 h-9 rounded-full border border-gray-200" />
+                    <img 
+                        :src="avatarUrl" 
+                        alt="avatar" 
+                        class="w-9 h-9 rounded-full border border-gray-200 object-cover" 
+                    />
                     <div class="hidden sm:block">
                         <div class="text-sm font-medium">{{ currentMember?.name }}</div>
-                        <div class="text-xs text-gray-500">{{ currentMember?.role?.description }}</div>
+                        <div class="text-xs text-gray-500">{{ rolesDisplay }}</div>
                     </div>
                 </div>
                 <div v-if="isDropdownOpen"
                     class="absolute right-0 top-12 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                     <ul class="py-2 text-sm text-gray-700">
                         <li>
-                            <a href="/profile"
+                            <router-link to="/profile"
                                 class="flex items-center gap-2 px-4 py-2 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
                                     viewBox="0 0 24 24">
@@ -58,7 +62,7 @@
                                         d="M5.121 17.804A9 9 0 1118.879 6.196M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                                 Hồ sơ
-                            </a>
+                            </router-link>
                         </li>
                         <li>
                             <router-link to="/settings"
@@ -105,15 +109,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import { useAuth } from "@/composables/useAuth";
 import { useRouter } from "vue-router";
+import defaultAvatarImg from "@/assets/avatar.png";
 
 defineEmits<{ (e: 'toggle-sidebar'): void }>();
 
 const { currentMember, clearMember } = useAuth();
 const router = useRouter();
 const isDropdownOpen = ref(false);
+
+const avatarUrl = computed(() => currentMember.value?.avatar || defaultAvatarImg);
+
+const rolesDisplay = computed(() => {
+    if (!currentMember.value?.roles || currentMember.value.roles.length === 0) {
+        return 'Chưa có vai trò';
+    }
+    return currentMember.value.roles.map(role => role.description).join(', ');
+});
 
 function toggleDropdown() {
     isDropdownOpen.value = !isDropdownOpen.value;

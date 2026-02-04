@@ -33,7 +33,7 @@
                     </RouterLink>
                 </li>
                 <li>
-                    <RouterLink v-if="['ADMIN'].includes(currentMember?.role?.name)" to="/users"
+                    <RouterLink v-if="hasAnyRole(['ADMIN'])" to="/users"
                         class="flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 hover:bg-emerald-50 hover:text-emerald-700"
                         :class="{ 'bg-emerald-100 text-emerald-700': $route.path === '/users' }">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -44,7 +44,7 @@
                     </RouterLink>
                 </li>
                 <li>
-                    <RouterLink v-if="['ADMIN', 'USER'].includes(currentMember?.role?.name)" to="/members/ds"
+                    <RouterLink v-if="hasAnyRole(['ADMIN', 'USER'])" to="/members/ds"
                         class="flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 hover:bg-emerald-50 hover:text-emerald-700"
                         :class="{ 'bg-emerald-100 text-emerald-700': $route.path === '/members/ds' }">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -55,7 +55,7 @@
                     </RouterLink>
                 </li>
                 <li>
-                    <RouterLink v-if="['ADMIN', 'USER'].includes(currentMember?.role?.name)" to="/members/ht"
+                    <RouterLink v-if="hasAnyRole(['ADMIN', 'USER'])" to="/members/ht"
                         class="flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 hover:bg-emerald-50 hover:text-emerald-700"
                         :class="{ 'bg-emerald-100 text-emerald-700': $route.path === '/members/ht' }">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -67,7 +67,7 @@
                 </li>
 
                 <li>
-                    <RouterLink v-if="['ADMIN'].includes(currentMember?.role?.name)" to="/majors"
+                    <RouterLink v-if="hasAnyRole(['ADMIN'])" to="/majors"
                         class="flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 hover:bg-emerald-50 hover:text-emerald-700"
                         :class="{ 'bg-emerald-100 text-emerald-700': $route.path === '/majors' }">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -78,7 +78,7 @@
                 </li>
 
                 <li>
-                    <RouterLink v-if="['ADMIN'].includes(currentMember?.role?.name)" to="/deaneries"
+                    <RouterLink v-if="hasAnyRole(['ADMIN'])" to="/deaneries"
                         class="flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 hover:bg-emerald-50 hover:text-emerald-700"
                         :class="{ 'bg-emerald-100 text-emerald-700': $route.path === '/deaneries' }">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -90,7 +90,7 @@
                 </li>
 
                 <li>
-                    <RouterLink v-if="['ADMIN'].includes(currentMember?.role?.name)" to="/religions"
+                    <RouterLink v-if="hasAnyRole(['ADMIN'])" to="/religions"
                         class="flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 hover:bg-emerald-50 hover:text-emerald-700"
                         :class="{ 'bg-emerald-100 text-emerald-700': $route.path === '/religions' }">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -101,7 +101,7 @@
                 </li>
 
                 <li>
-                    <RouterLink v-if="['ADMIN'].includes(currentMember?.role?.name)" to="/ranks"
+                    <RouterLink v-if="hasAnyRole(['ADMIN'])" to="/ranks"
                         class="flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 hover:bg-emerald-50 hover:text-emerald-700"
                         :class="{ 'bg-emerald-100 text-emerald-700': $route.path === '/ranks' }">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -113,7 +113,7 @@
                 </li>
 
                 <li>
-                    <RouterLink v-if="['ADMIN'].includes(currentMember?.role?.name)" to="/responsibilities"
+                    <RouterLink v-if="hasAnyRole(['ADMIN'])" to="/responsibilities"
                         class="flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 hover:bg-emerald-50 hover:text-emerald-700"
                         :class="{ 'bg-emerald-100 text-emerald-700': $route.path === '/responsibilities' }">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -125,7 +125,7 @@
                 </li>
 
                 <li>
-                    <RouterLink v-if="['ADMIN', 'USER', 'HT'].includes(currentMember?.role?.name)" to="/activities"
+                    <RouterLink v-if="hasAnyRole(['ADMIN', 'USER', 'HT'])" to="/activities"
                         class="flex items-center gap-3 px-3 py-2 rounded-md text-gray-700 hover:bg-emerald-50 hover:text-emerald-700"
                         :class="{ 'bg-emerald-100 text-emerald-700': $route.path === '/activities' }">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -137,7 +137,7 @@
                 </li>
 
             </ul>
-            <div v-if="['ADMIN', 'USER', 'HT'].includes(currentMember?.role?.name)" class="mt-6">
+            <div v-if="hasAnyRole(['ADMIN', 'USER', 'HT'])" class="mt-6">
                 <h4 class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Thống kê</h4>
                 <div class="mt-3 space-y-2 px-3">
                     <RouterLink to="/statistics/ds"
@@ -155,12 +155,26 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import { useAuth } from "@/composables/useAuth";
 const { currentMember } = useAuth();
 
 // Định nghĩa Props và Emits
 defineProps<{ isOpen: boolean }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
+
+// Helper function to check if user has any of the required roles
+const hasAnyRole = (requiredRoles: string[]): boolean => {
+    const userRoles = currentMember.value?.roles?.map(r => r.name) || [];
+    const result = userRoles.some(role => requiredRoles.includes(role));
+    console.log('hasAnyRole check:', { 
+        currentMember: currentMember.value?.name,
+        userRoles, 
+        requiredRoles, 
+        result 
+    });
+    return result;
+};
 
 /**
  * Xử lý khi click vào thanh điều hướng

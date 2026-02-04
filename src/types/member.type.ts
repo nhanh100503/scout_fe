@@ -116,11 +116,12 @@ export interface MemberDto {
     parish: string;
     federation: string;
     team: string;
+    avatar?: string;
 
     deanery?: DeaneryDto;
     gender?: GenderDto;
     rank?: RankDto;
-    role?: RoleDto;
+    roles?: RoleDto[];  // Changed from role?: RoleDto to support multiple roles
     religion?: ReligionDto;
     responsibility?: ResponsibilityDto;
 

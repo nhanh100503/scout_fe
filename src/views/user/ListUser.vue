@@ -99,6 +99,8 @@ import { ref, onMounted } from "vue";
 import { useToast } from "@/composables/useToast";
 import { UserDto } from "@/types/user.type";
 import { deleteUser, getAllUser } from "@/services/userService";
+import { parseJwt } from "@/utils/jwt.util";
+import { getLS } from "@/tools/localStorage.tool";
 
 const users = ref<UserDto[]>([]);
 const showConfirm = ref(false);
@@ -115,7 +117,22 @@ async function fetchUsers() {
             toast.value = { message: res.message, type: "error" };
         }
     } catch (error: any) {
-        toast.value = { message: error.message, type: "error" };
+        console.error("Fetch users error:", error);
+        
+        // Debug JWT on error
+        const token = getLS("accessToken");
+        let debugInfo = "";
+        if (token) {
+            const payload = parseJwt(token);
+            console.log("JWT Payload:", payload);
+            const roles = payload.roles || payload.role || payload.authorities || "No roles found";
+            debugInfo = ` | Token Roles: ${JSON.stringify(roles)}`;
+        }
+
+        toast.value = { 
+            message: `${error.message || 'Lỗi tải danh sách'}${error.code === 403 ? '. Kiểm tra quyền truy cập (Backend Denied).' + debugInfo : ''}`, 
+            type: "error" 
+        };
     }
 }
 
@@ -143,3 +160,4 @@ onMounted(() => {
     fetchUsers();
 });
 </script>
+
