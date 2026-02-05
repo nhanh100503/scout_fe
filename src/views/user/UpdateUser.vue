@@ -49,6 +49,22 @@
                         </div>
                     </div>
 
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Vai trò <span
+                                class="text-red-500">*
+                            </span></label>
+                        <select v-model="form.roles" multiple :class="inputClass(errors.roles)"
+                            class="mt-1 w-full border rounded-md px-3 py-2">
+                            <option v-for="role in roles" :key="role.roleId" :value="role.name">
+                                {{ role.name }}
+                            </option>
+                        </select>
+                        <p class="mt-1 text-xs text-gray-500">Giữ Ctrl (hoặc Cmd) để chọn nhiều vai trò</p>
+                        <p v-if="errors.roles" class="mt-1 text-xs text-red-500 break-words">
+                            {{ errors.roles }}
+                        </p>
+                    </div>
+
                     <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">
                         Cập nhật người dùng
                     </button>
@@ -62,7 +78,9 @@
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { getAllGenders } from "@/services/genderService";
+import { getAllRoles } from "@/services/roleService";
 import { GenderDto } from "@/types/gender.type";
+import { RoleDto } from "@/types/role.type";
 import type { UserDto } from "@/types/user.type";
 import { useToast } from "@/composables/useToast";
 import { inputClass } from "@/utils/inputClass";
@@ -76,12 +94,14 @@ const router = useRouter();
 const memberId = Number(route.params.memberId);
 const { toast, showToast } = useToast();
 const genders = ref<GenderDto[]>([]);
+const roles = ref<RoleDto[]>([]);
 
 const form = ref<UserUpdateRequest>({
     name: "",
     genderId: null,
     phone: "",
-    address: ""
+    address: "",
+    roles: []
 });
 
 onMounted(async () => {
@@ -95,9 +115,12 @@ onMounted(async () => {
                 phone: m.phone,
                 address: m.address,
                 genderId: m.gender?.genderId || 0,
+                roles: m.roles ? m.roles.map(r => r.name) : [],
             };
         }
         genders.value = (await getAllGenders()).data;
+        roles.value = (await getAllRoles()).data;
+        console.log(`roles`, roles.value);
     } catch (err: any) {
     showToast(err.message, "error");
 }

@@ -6,6 +6,7 @@ export interface UserUpdateRequest {
     phone: string;
     address: string;
     genderId: number;
+    roles?: string[]; // Array of role names instead of IDs
 }
 
 export interface UserCreateRequest {
@@ -24,7 +25,7 @@ export interface UserDto {
     email: string;
     address: string;
     gender: GenderDto;
-    role: RoleDto
+    roles: RoleDto[];
 }
 
 export type ValidationErrorUser = Record<string, string>;
