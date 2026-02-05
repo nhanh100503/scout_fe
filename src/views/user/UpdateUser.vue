@@ -55,7 +55,7 @@
                             </span></label>
                         <select v-model="form.roles" multiple :class="inputClass(errors.roles)"
                             class="mt-1 w-full border rounded-md px-3 py-2">
-                            <option v-for="role in roles" :key="role.roleId" :value="role.roleId">
+                            <option v-for="role in roles" :key="role.roleId" :value="role.name">
                                 {{ role.name }}
                             </option>
                         </select>
@@ -115,7 +115,7 @@ onMounted(async () => {
                 phone: m.phone,
                 address: m.address,
                 genderId: m.gender?.genderId || 0,
-                roles: m.roles ? m.roles.map(r => r.roleId) : [],
+                roles: m.roles ? m.roles.map(r => r.name) : [],
             };
         }
         genders.value = (await getAllGenders()).data;
