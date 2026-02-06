@@ -1,6 +1,7 @@
 import { DeaneryDto } from '@/types/deanery.type';
 import { AttendanceDto } from "./attendance.type";
 import { MemberDto } from "./member.type";
+import { CommentDto } from "./comment.type";
 
 export interface ActivityCreateRequest {
     deaneryId: number;
@@ -28,6 +29,7 @@ export interface ActivityDto {
     deanery: DeaneryDto;
     status: boolean;
     attendances?: AttendanceDto[];
+    comments?: CommentDto[];
 }
 
 export type ValidationErrorActivity = Record<string, string>;
