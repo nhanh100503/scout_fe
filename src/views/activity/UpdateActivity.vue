@@ -67,6 +67,7 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { ApiResponse } from "@/types/api.type";
 import { useToast } from "@/composables/useToast";
+import { useAuth } from "@/composables/useAuth";
 import { inputClass } from "@/utils/inputClass";
 import type { ActivityDto, ActivityUpdateRequest, ValidationErrorActivity } from "@/types/activity.type";
 import { getActivityById, updateActivity } from "@/services/activityService";
@@ -75,6 +76,7 @@ import type { DeaneryDto } from "@/types/deanery.type";
 
 const errors = ref<ValidationErrorActivity>({});
 const { showToast } = useToast();
+const { canModifyActivity } = useAuth();
 const route = useRoute();
 const router = useRouter();
 
@@ -91,6 +93,13 @@ const deaneries = ref<DeaneryDto[]>([]);
 const activityId = Number(route.params.activityId);
 
 onMounted(async () => {
+    // Route guard: Redirect DS-only users
+    if (!canModifyActivity.value) {
+        showToast("Bạn không có quyền sửa sinh hoạt. Vai trò DS chỉ có quyền xem và bình luận.", "error");
+        router.push("/activities");
+        return;
+    }
+
     try {
         const res: ApiResponse<ActivityDto> = await getActivityById(activityId);
         if (res.code === 200) {

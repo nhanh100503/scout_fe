@@ -41,7 +41,7 @@
                                 <td class="px-3 py-2 text-sm">{{ index + 1 }}</td>
                                 <td class="px-3 py-2 text-sm">{{ member.name }}</td>
                                 <td class="px-3 py-2 text-sm">{{ formatDate(member.birthday) }}</td>
-                                <td class="px-3 py-2 text-sm">{{ member.role.name }}</td>
+                                <td class="px-3 py-2 text-sm">{{ member.roles?.map(r => r.name).join(", ") || "N/A" }}</td>
                                 <td class="px-3 py-2 text-sm">
                                     <input type="checkbox" v-model="attendanceForm[index].present" />
                                 </td>

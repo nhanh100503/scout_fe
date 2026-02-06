@@ -72,6 +72,7 @@
 import { ref, onMounted } from "vue";
 import router from "@/routers";
 import { useToast } from "@/composables/useToast";
+import { useAuth } from "@/composables/useAuth";
 import { inputClass } from "@/utils/inputClass";
 import type { ApiResponse } from "@/types/api.type";
 import { ActivityCreateRequest, ValidationErrorActivity } from "@/types/activity.type";
@@ -90,8 +91,16 @@ const form = ref<ActivityCreateRequest>({
 const errors = ref<ValidationErrorActivity>({});
 const deaneries = ref<DeaneryDto[]>([]);
 const { showToast } = useToast();
+const { canModifyActivity, isDSOnly } = useAuth();
 
 onMounted(async () => {
+    // Route guard: Redirect DS-only users
+    if (!canModifyActivity.value) {
+        showToast("Bạn không có quyền tạo sinh hoạt. Vai trò Đoàn Sinh chỉ có quyền xem và bình luận.", "error");
+        router.push("/activities");
+        return;
+    }
+
     try {
         const res: ApiResponse<DeaneryDto[]> = await getAllDeanery();
         if (res.code === 200) {
