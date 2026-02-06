@@ -82,10 +82,11 @@
                                     {{activity.attendances?.filter(a => a.present).length ?? 0}}
                                 </td>
                                 <td class="px-3 py-2 text-xs md:text-sm">
-                                    <router-link :to="`/attendances/add/${activity.activityId}`"
+                                    <router-link v-if="canAccessAttendance" :to="`/attendances/add/${activity.activityId}`"
                                         class="px-2.5 md:px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs md:text-sm">
                                         Điểm danh
                                     </router-link>
+                                    <span v-else class="text-gray-400 text-xs">---</span>
                                 </td>
                                 <td class="px-3 py-2 text-xs md:text-sm">
                                     <button v-if="canModifyActivity" @click="handleChangeStatus(activity.activityId)"
@@ -126,7 +127,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { useToast } from "@/composables/useToast";
 import { useAuth } from "@/composables/useAuth";
 import { getAllDeanery } from "@/services/deaneryService";
@@ -137,7 +138,7 @@ import type { ApiResponse } from "@/types/api.type";
 import { formatDate } from "@/utils/dateFormat";
 
 const { showToast } = useToast();
-const { canModifyActivity } = useAuth();
+const { canModifyActivity, canAccessAttendance } = useAuth();
 const deaneries = ref<DeaneryDto[]>([]);
 const activities = ref<ActivityDto[]>([]);
 const selectedDeaneryId = ref<number | "">("");

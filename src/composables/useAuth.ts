@@ -39,6 +39,24 @@ export function useAuth() {
     });
 
     /**
+     * Check if user can access attendance features
+     * Only HT, DT, and ADMIN roles can take attendance
+     * USER and DS roles are restricted
+     */
+    const canAccessAttendance = computed(() => {
+        const userRoles = currentMember.value?.roles?.map(r => r.name) || [];
+
+        // No roles = no permission
+        if (userRoles.length === 0) {
+            return false;
+        }
+
+        // Check if user has at least one elevated role
+        const elevatedRoles = ['HT', 'DT', 'ADMIN'];
+        return userRoles.some(role => elevatedRoles.includes(role));
+    });
+
+    /**
      * Check if user has any of the specified roles
      * @param requiredRoles - Array of role names to check
      */
@@ -60,6 +78,7 @@ export function useAuth() {
         setMember,
         clearMember,
         canModifyActivity,
+        canAccessAttendance,
         hasAnyRole,
         isDSOnly
     };
