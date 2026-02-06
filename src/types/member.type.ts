@@ -19,7 +19,6 @@ export interface MemberRoleDSCreateRequest {
 
     deaneryId: number | null;
     genderId: number | null;
-    rankId: number | null;
     roleId: number;
     religionId: number | null;
     responsibilityId: number | null;
@@ -38,7 +37,6 @@ export interface MemberRoleDSUpdateRequest {
 
     deaneryId: number | null;
     genderId: number | null;
-    rankId: number | null;
     roleId: number;
     religionId: number | null;
     responsibilityId: number | null;
@@ -64,7 +62,6 @@ export interface MemberRoleHTUpdateRequest {
 
     deaneryId: number | null;
     genderId: number | null;
-    rankId: number | null;
     roleId: number;
     religionId: number | null;
     responsibilityId: number | null;
@@ -90,7 +87,6 @@ export interface MemberRoleHTCreateRequest {
 
     deaneryId: number | null;
     genderId: number | null;
-    rankId: number | null;
     roleId: number;
     religionId: number | null;
     responsibilityId: number | null;
@@ -115,6 +111,7 @@ export interface MemberDto {
     career: string;
     placeOfBirth?: string;
     otherResponsibility?: string;
+    deaneryId?: number;
     parishId?: number;
     federationId?: number;
     team: string;

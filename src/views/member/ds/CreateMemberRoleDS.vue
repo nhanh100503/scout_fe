@@ -150,34 +150,19 @@
                             </p>
                         </select>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Trách vụ <span class="text-red-500">*
-                                </span></label>
-                            <select v-model="form.responsibilityId" :class="inputClass(errors.responsibilityId)">
-                                <option value="">-- Chọn trách vụ --</option>
-                                <option v-for="item in responsibilities" :key="item.responsibilityId"
-                                    :value="item.responsibilityId">
-                                    {{ item.name }}
-                                </option>
-                            </select>
-                            <p v-if="errors.responsibilityId" class="mt-1 text-xs text-red-500 break-words">
-                                {{ errors.responsibilityId }}
-                            </p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Đẳng thứ <span class="text-red-500">*
-                                </span></label>
-                            <select v-model="form.rankId" :class="inputClass(errors.rankId)">
-                                <option value="">-- Chọn --</option>
-                                <option v-for="item in ranks" :key="item.rankId" :value="item.rankId">
-                                    {{ item.name }}
-                                </option>
-                            </select>
-                            <p v-if="errors.rankId" class="mt-1 text-xs text-red-500 break-words">
-                                {{ errors.rankId }}
-                            </p>
-                        </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Trách vụ <span class="text-red-500">*
+                            </span></label>
+                        <select v-model="form.responsibilityId" :class="inputClass(errors.responsibilityId)">
+                            <option value="">-- Chọn trách vụ --</option>
+                            <option v-for="item in responsibilities" :key="item.responsibilityId"
+                                :value="item.responsibilityId">
+                                {{ item.name }}
+                            </option>
+                        </select>
+                        <p v-if="errors.responsibilityId" class="mt-1 text-xs text-red-500 break-words">
+                            {{ errors.responsibilityId }}
+                        </p>
                     </div>
                 </div>
                 <div class="pt-4">
@@ -197,8 +182,6 @@ import { getAllDeanery } from "@/services/deaneryService";
 import { getAllReligion } from "@/services/religionService";
 import { MajorDto } from "@/types/major.type";
 import { getAllMajor } from "@/services/majorService";
-import { RankDto } from "@/types/rank.type";
-import { getAllRanksTypeFalse } from "@/services/rankService";
 import { ResponsibilityDto } from "@/types/responsibility.type";
 import { watch } from "vue";
 import { getAllResponsibilitiesDSByMajorId } from "@/services/responsibilityService";
@@ -225,7 +208,6 @@ const form = ref<MemberRoleDSCreateRequest>({
     team: "",
     deaneryId: null,
     genderId: null,
-    rankId: null,
     roleId: 1,
     religionId: null,
     responsibilityId: null,
@@ -237,7 +219,6 @@ const parishes = ref<ParishDto[]>([]);
 const federations = ref<FederationDto[]>([]);
 const religions = ref<ReligionDto[]>([]);
 const majors = ref<MajorDto[]>([]);
-const ranks = ref<RankDto[]>([])
 const responsibilities = ref<ResponsibilityDto[]>([]);
 const genders = ref<GenderDto[]>([])
 const errors = ref<ValidationErrorMember>({});
@@ -256,9 +237,6 @@ onMounted(async () => {
 
         const resMajor = await getAllMajor();
         majors.value = resMajor.data;
-
-        const resRank = await getAllRanksTypeFalse();
-        ranks.value = resRank.data;
 
         const resGender = await getAllGenders();
         genders.value = resGender.data;

@@ -9,7 +9,7 @@
                             <label class="block text-sm font-medium text-gray-700">Châu <span class="text-red-500">*
                                 </span></label>
                             <select v-model="form.deaneryId" :class="inputClass(errors.deaneryId)" @change="onDeaneryChange">
-                                <option value="" disabled>-- Chọn châu --</option>
+                                <option :value="null" disabled>-- Chọn châu --</option>
                                 <option v-for="item in deaneries" :key="item.deaneryId" :value="item.deaneryId">
                                     {{ item.name }}
                                 </option>
@@ -22,7 +22,7 @@
                             <label class="block text-sm font-medium text-gray-700">Đạo <span class="text-red-500">*
                                 </span></label>
                             <select v-model="form.parishId" :class="inputClass(errors.parishId)" @change="onParishChange">
-                                <option value="" disabled>-- Chọn đạo --</option>
+                                <option :value="null" disabled>-- Chọn đạo --</option>
                                 <option v-for="item in parishes" :key="item.parishId" :value="item.parishId">
                                     {{ item.name }}
                                 </option>
@@ -36,7 +36,7 @@
                                     class="text-red-500">*
                                 </span></label>
                             <select v-model="form.federationId" :class="inputClass(errors.federationId)">
-                                <option value="" disabled>-- Chọn liên đoàn --</option>
+                                <option :value="null" disabled>-- Chọn liên đoàn --</option>
                                 <option v-for="item in federations" :key="item.federationId" :value="item.federationId">
                                     {{ item.name }}
                                 </option>
@@ -234,21 +234,7 @@
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Đẳng thứ <span class="text-red-500">*
-                            </span></label>
-                        <select v-model="form.rankId" :class="inputClass(errors.rankId)">
-                            <option value="" disabled>-- Chọn --</option>
-                            <option v-for="item in ranks" :key="item.rankId" :value="item.rankId">
-                                {{ item.name }}
-                            </option>
-                        </select>
-                        <p v-if="errors.rankId" class="mt-1 text-xs text-red-500 break-words">
-                            {{ errors.rankId }}
-                        </p>
-                    </div>
                 </div>
-
                 <div class="pt-4">
                     <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">
                         Cập nhật huynh trưởng
@@ -266,7 +252,6 @@ import { getMemberById, updateMemberRoleHT } from "@/services/memberService";
 import { getAllDeanery } from "@/services/deaneryService";
 import { getAllReligion } from "@/services/religionService";
 import { getAllMajor } from "@/services/majorService";
-import { getAllRanksTypeTrue } from "@/services/rankService";
 import { getAllResponsibilitiesHTByMajorId } from "@/services/responsibilityService";
 import { getAllGenders } from "@/services/genderService";
 import type { MemberDto, MemberRoleHTUpdateRequest, ValidationErrorMember } from "@/types/member.type";
@@ -277,7 +262,6 @@ import { getParishesByDeaneryId } from "@/services/parishService";
 import { getFederationsByParishId } from "@/services/federationService";
 import { ReligionDto } from "@/types/religion.type";
 import { MajorDto } from "@/types/major.type";
-import { RankDto } from "@/types/rank.type";
 import { ResponsibilityDto } from "@/types/responsibility.type";
 import { GenderDto } from "@/types/gender.type";
 import { ApiResponse } from "@/types/api.type";
@@ -295,7 +279,6 @@ const parishes = ref<ParishDto[]>([]);
 const federations = ref<FederationDto[]>([]);
 const religions = ref<ReligionDto[]>([]);
 const majors = ref<MajorDto[]>([]);
-const ranks = ref<RankDto[]>([]);
 const responsibilities = ref<ResponsibilityDto[]>([]);
 const genders = ref<GenderDto[]>([]);
 const selectedPastMajors = ref<number[]>([]);
@@ -311,7 +294,6 @@ const form = ref<MemberRoleHTUpdateRequest>({
     team: "",
     deaneryId: null,
     genderId: null,
-    rankId: null,
     roleId: 2, // Mặc định là Huynh Trưởng
     religionId: null,
     responsibilityId: null,
@@ -328,18 +310,16 @@ const form = ref<MemberRoleHTUpdateRequest>({
 onMounted(async () => {
     try {
         // Tải tất cả danh mục cùng lúc
-        const [resDea, resRel, resMaj, resRan, resGen] = await Promise.all([
+        const [resDea, resRel, resMaj, resGen] = await Promise.all([
             getAllDeanery(),
             getAllReligion(),
             getAllMajor(),
-            getAllRanksTypeTrue(),
             getAllGenders()
         ]);
 
         deaneries.value = resDea.data;
         religions.value = resRel.data;
         majors.value = resMaj.data;
-        ranks.value = resRan.data;
         genders.value = resGen.data;
 
         // Tải thông tin chi tiết Huynh trưởng
@@ -369,9 +349,8 @@ onMounted(async () => {
                 parishId: m.parishId || null,
                 federationId: m.federationId || null,
                 team: m.team,
-                deaneryId: m.deanery?.deaneryId || null,
+                deaneryId: m.deaneryId || null,
                 genderId: m.gender?.genderId || null,
-                rankId: m.rank?.rankId || null,
                 religionId: m.religion?.religionId || null,
                 responsibilityId: m.responsibility?.responsibilityId || null,
                 roleId: m.roles?.[0]?.roleId || 2,
@@ -379,8 +358,8 @@ onMounted(async () => {
             };
 
             // Load parishes and federations if deaneryId and parishId exist
-            if (m.deanery?.deaneryId) {
-                const resParishes = await getParishesByDeaneryId(m.deanery.deaneryId);
+            if (m.deaneryId) {
+                const resParishes = await getParishesByDeaneryId(m.deaneryId);
                 parishes.value = resParishes.data;
             }
             if (m.parishId) {
