@@ -8,7 +8,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Châu <span class="text-red-500">*
                                 </span></label>
-                            <select v-model="form.deaneryId" :class="inputClass(errors.deaneryId)">
+                            <select v-model="form.deaneryId" :class="inputClass(errors.deaneryId)" @change="onDeaneryChange">
                                 <option value="" disabled>-- Chọn châu --</option>
                                 <option v-for="item in deaneries" :key="item.deaneryId" :value="item.deaneryId">
                                     {{ item.name }}
@@ -21,18 +21,28 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Đạo <span class="text-red-500">*
                                 </span></label>
-                            <input v-model="form.parish" type="text" :class="inputClass(errors.parish)" />
-                            <p v-if="errors.parish" class="mt-1 text-xs text-red-500 break-words">
-                                {{ errors.parish }}
+                            <select v-model="form.parishId" :class="inputClass(errors.parishId)" @change="onParishChange">
+                                <option value="" disabled>-- Chọn đạo --</option>
+                                <option v-for="item in parishes" :key="item.parishId" :value="item.parishId">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                            <p v-if="errors.parishId" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.parishId }}
                             </p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Liên đoàn <span
                                     class="text-red-500">*
                                 </span></label>
-                            <input v-model="form.federation" type="text" :class="inputClass(errors.federation)" />
-                            <p v-if="errors.federation" class="mt-1 text-xs text-red-500 break-words">
-                                {{ errors.federation }}
+                            <select v-model="form.federationId" :class="inputClass(errors.federationId)">
+                                <option value="" disabled>-- Chọn liên đoàn --</option>
+                                <option v-for="item in federations" :key="item.federationId" :value="item.federationId">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                            <p v-if="errors.federationId" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.federationId }}
                             </p>
                         </div>
                         <div>
@@ -261,6 +271,10 @@ import { getAllResponsibilitiesHTByMajorId } from "@/services/responsibilityServ
 import { getAllGenders } from "@/services/genderService";
 import type { MemberDto, MemberRoleHTUpdateRequest, ValidationErrorMember } from "@/types/member.type";
 import { DeaneryDto } from "@/types/deanery.type";
+import { ParishDto } from "@/types/parish.type";
+import { FederationDto } from "@/types/federation.type";
+import { getParishesByDeaneryId } from "@/services/parishService";
+import { getFederationsByParishId } from "@/services/federationService";
 import { ReligionDto } from "@/types/religion.type";
 import { MajorDto } from "@/types/major.type";
 import { RankDto } from "@/types/rank.type";
@@ -277,6 +291,8 @@ const memberId = Number(route.params.memberId);
 const { toast, showToast } = useToast();
 
 const deaneries = ref<DeaneryDto[]>([]);
+const parishes = ref<ParishDto[]>([]);
+const federations = ref<FederationDto[]>([]);
 const religions = ref<ReligionDto[]>([]);
 const majors = ref<MajorDto[]>([]);
 const ranks = ref<RankDto[]>([]);
@@ -290,8 +306,8 @@ const form = ref<MemberRoleHTUpdateRequest>({
     birthday: "",
     startYear: "",
     pledgeYear: "",
-    parish: "",
-    federation: "",
+    parishId: null,
+    federationId: null,
     team: "",
     deaneryId: null,
     genderId: null,
@@ -350,17 +366,27 @@ onMounted(async () => {
                 birthday: formattedBirthday,
                 startYear: m.startYear,
                 pledgeYear: m.pledgeYear,
-                parish: m.parish,
-                federation: m.federation,
+                parishId: m.parishId || null,
+                federationId: m.federationId || null,
                 team: m.team,
                 deaneryId: m.deanery?.deaneryId || null,
                 genderId: m.gender?.genderId || null,
                 rankId: m.rank?.rankId || null,
                 religionId: m.religion?.religionId || null,
                 responsibilityId: m.responsibility?.responsibilityId || null,
-                roleId: m.role?.roleId || 2,
+                roleId: m.roles?.[0]?.roleId || 2,
                 majors: m.majors || []
             };
+
+            // Load parishes and federations if deaneryId and parishId exist
+            if (m.deanery?.deaneryId) {
+                const resParishes = await getParishesByDeaneryId(m.deanery.deaneryId);
+                parishes.value = resParishes.data;
+            }
+            if (m.parishId) {
+                const resFederations = await getFederationsByParishId(m.parishId);
+                federations.value = resFederations.data;
+            }
 
             // Cập nhật trạng thái hiển thị trên Form
             selectedPastMajors.value = m.majors?.map(x => x.majorId) || [];
@@ -426,6 +452,36 @@ watch(currentMajorId, async (newMajorId) => {
         form.value.responsibilityId = null;
     }
 });
+
+const onDeaneryChange = async () => {
+    form.value.parishId = null;
+    form.value.federationId = null;
+    parishes.value = [];
+    federations.value = [];
+    
+    if (form.value.deaneryId) {
+        try {
+            const res = await getParishesByDeaneryId(form.value.deaneryId);
+            parishes.value = res.data;
+        } catch (error) {
+            showToast(error);
+        }
+    }
+};
+
+const onParishChange = async () => {
+    form.value.federationId = null;
+    federations.value = [];
+    
+    if (form.value.parishId) {
+        try {
+            const res = await getFederationsByParishId(form.value.parishId);
+            federations.value = res.data;
+        } catch (error) {
+            showToast(error);
+        }
+    }
+};
 
 async function handleSubmit() {
     errors.value = {};

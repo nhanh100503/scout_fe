@@ -17,12 +17,12 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Đạo</label>
-                            <input type="text" :value="member.parish" readonly
+                            <input type="text" :value="member.parish?.name" readonly
                                 class="mt-1 w-full border rounded-md px-3 py-2 bg-gray-100" />
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Liên đoàn</label>
-                            <input type="text" :value="member.federation" readonly
+                            <input type="text" :value="member.federation?.name" readonly
                                 class="mt-1 w-full border rounded-md px-3 py-2 bg-gray-100" />
                         </div>
                         <div>
