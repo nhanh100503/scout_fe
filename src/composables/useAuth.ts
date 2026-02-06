@@ -3,6 +3,8 @@ import { MemberDto } from "@/types/member.type";
 import { ref, computed } from "vue";
 
 const currentMember = ref<MemberDto | null>(null);
+// Check if user has at least one elevated role
+const elevatedRoles = ['HT', 'DT', 'ADMIN'];
 
 export function useAuth() {
     function setMember(user: MemberDto) {
@@ -11,6 +13,8 @@ export function useAuth() {
         currentMember.value = user;
         console.log('currentMember.value after set:', currentMember.value);
     }
+
+
 
     function clearMember() {
         currentMember.value = null;
@@ -29,13 +33,15 @@ export function useAuth() {
             return false;
         }
 
+        if (userRoles.some(r => elevatedRoles.includes(r)) == true) {
+            return true;
+        }
+
         // If user has DS role, they cannot modify activities
         if (userRoles.includes('DS')) {
             return false;
         }
 
-        // All other roles (ADMIN, HT, DT) can modify
-        return true;
     });
 
     /**
@@ -50,9 +56,6 @@ export function useAuth() {
         if (userRoles.length === 0) {
             return false;
         }
-
-        // Check if user has at least one elevated role
-        const elevatedRoles = ['HT', 'DT', 'ADMIN'];
         return userRoles.some(role => elevatedRoles.includes(role));
     });
 
