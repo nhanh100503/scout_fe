@@ -78,6 +78,16 @@ const routes = [
             { path: ROUTER_PATHS.DETAIL_DEANERY, name: 'detailDeanery', component: DetailDeanery },
             { path: ROUTER_PATHS.UPDATE_DEANERY, name: 'updateDeanery', component: UpdateDeanery },
 
+            { path: '/parishes', name: 'listParish', component: () => import('@/views/parish/ListParish.vue') },
+            { path: '/parishes/add', name: 'addParish', component: () => import('@/views/parish/CreateParish.vue') },
+            { path: '/parishes/detail/:parishId', name: 'detailParish', component: () => import('@/views/parish/DetailParish.vue') },
+            { path: '/parishes/update/:parishId', name: 'updateParish', component: () => import('@/views/parish/UpdateParish.vue') },
+
+            { path: '/federations', name: 'listFederation', component: () => import('@/views/federation/ListFederation.vue') },
+            { path: '/federations/add', name: 'addFederation', component: () => import('@/views/federation/CreateFederation.vue') },
+            { path: '/federations/detail/:federationId', name: 'detailFederation', component: () => import('@/views/federation/DetailFederation.vue') },
+            { path: '/federations/update/:federationId', name: 'updateFederation', component: () => import('@/views/federation/UpdateFederation.vue') },
+
             { path: ROUTER_PATHS.LIST_RELIGION, name: 'listReligion', component: ListReligion },
             { path: ROUTER_PATHS.ADD_RELIGION, name: 'createReligion', component: CreateReligion },
             { path: ROUTER_PATHS.DETAIL_RELIGION, name: 'detailReligion', component: DetailReligion },

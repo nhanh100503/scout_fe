@@ -5,22 +5,24 @@ import { RankDto } from "./rank.type";
 import { ReligionDto } from "./religion.type";
 import { ResponsibilityDto } from "./responsibility.type";
 import { RoleDto } from "./role.type";
+import { ParishDto } from "./parish.type";
+import { FederationDto } from "./federation.type";
 
 export interface MemberRoleDSCreateRequest {
     name: string;
     birthday: string;
     startYear: string;
     pledgeYear: string;
-    parish: string;
-    federation: string;
+    parishId: number | null;
+    federationId: number | null;
     team: string;
 
-    deaneryId: number;
-    genderId: number;
-    rankId: number;
+    deaneryId: number | null;
+    genderId: number | null;
+    rankId: number | null;
     roleId: number;
-    religionId: number;
-    responsibilityId: number;
+    religionId: number | null;
+    responsibilityId: number | null;
 
     majors?: MajorRequest[];
 }
@@ -30,16 +32,16 @@ export interface MemberRoleDSUpdateRequest {
     birthday: string;
     startYear: string;
     pledgeYear: string;
-    parish: string;
-    federation: string;
+    parishId: number | null;
+    federationId: number | null;
     team: string;
 
-    deaneryId: number;
-    genderId: number;
-    rankId: number;
+    deaneryId: number | null;
+    genderId: number | null;
+    rankId: number | null;
     roleId: number;
-    religionId: number;
-    responsibilityId: number;
+    religionId: number | null;
+    responsibilityId: number | null;
 
     majors?: MajorRequest[];
 }
@@ -56,15 +58,15 @@ export interface MemberRoleHTUpdateRequest {
     career: string;
     placeOfBirth: string;
     otherResponsibility: string;
-    parish: string;
-    federation: string;
+    parishId: number | null;
+    federationId: number | null;
     team: string;
 
-    deaneryId: number;
-    genderId: number;
-    rankId: number;
+    deaneryId: number | null;
+    genderId: number | null;
+    rankId: number | null;
     roleId: number;
-    religionId: number;
+    religionId: number | null;
     responsibilityId: number | null;
 
     majors?: MajorRequest[];
@@ -82,15 +84,15 @@ export interface MemberRoleHTCreateRequest {
     career: string;
     placeOfBirth: string;
     otherResponsibility: string;
-    parish: string;
-    federation: string;
+    parishId: number | null;
+    federationId: number | null;
     team: string;
 
-    deaneryId: number;
-    genderId: number;
-    rankId: number;
+    deaneryId: number | null;
+    genderId: number | null;
+    rankId: number | null;
     roleId: number;
-    religionId: number;
+    religionId: number | null;
     responsibilityId: number | null;
 
     majors?: MajorRequest[];
@@ -113,12 +115,14 @@ export interface MemberDto {
     career: string;
     placeOfBirth?: string;
     otherResponsibility?: string;
-    parish: string;
-    federation: string;
+    parishId?: number;
+    federationId?: number;
     team: string;
     avatar?: string;
 
     deanery?: DeaneryDto;
+    parish?: ParishDto;
+    federation?: FederationDto;
     gender?: GenderDto;
     rank?: RankDto;
     roles?: RoleDto[];  // Changed from role?: RoleDto to support multiple roles
