@@ -35,6 +35,19 @@
                                 class="mt-1 w-full border rounded-md px-3 py-2 bg-gray-100" />
                         </div>
                     </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Vai trò</label>
+                        <div class="mt-1 flex flex-wrap gap-2">
+                            <span v-for="role in user.roles" :key="role.roleId"
+                                class="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-sm">
+                                {{ role.name }}
+                            </span>
+                            <span v-if="!user.roles || user.roles.length === 0"
+                                class="text-gray-500 italic">Chưa có vai trò</span>
+                        </div>
+                    </div>
+
                     <router-link :to="`/users/update/${user.memberId}`"
                         class="mt-2 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 inline-block">
                         Cập nhật người dùng
@@ -63,7 +76,7 @@ onMounted(async () => {
         const resUser = await getUserById(memberId);
         if (resUser.code === 200) {
             user.value = resUser.data;
-            console.log(user.value);
+            console.log(`User data:`, user.value);
         }
     } catch (err: any) {
         toast.value = { type: "error", message: err.message };

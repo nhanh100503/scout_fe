@@ -4,7 +4,7 @@
             <h2 class="text-lg md:text-xl font-semibold text-emerald-700">
                 Danh sách sinh hoạt theo châu
             </h2>
-            <router-link to="/activities/add"
+            <router-link v-if="canModifyActivity" to="/activities/add"
                 class="px-3 md:px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-sm md:text-base">
                 + Thêm sinh hoạt
             </router-link>
@@ -82,16 +82,18 @@
                                     {{activity.attendances?.filter(a => a.present).length ?? 0}}
                                 </td>
                                 <td class="px-3 py-2 text-xs md:text-sm">
-                                    <router-link :to="`/attendances/add/${activity.activityId}`"
+                                    <router-link v-if="canAccessAttendance" :to="`/attendances/add/${activity.activityId}`"
                                         class="px-2.5 md:px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs md:text-sm">
                                         Điểm danh
                                     </router-link>
+                                    <span v-else class="text-gray-400 text-xs">---</span>
                                 </td>
                                 <td class="px-3 py-2 text-xs md:text-sm">
-                                    <button @click="handleChangeStatus(activity.activityId)"
+                                    <button v-if="canModifyActivity" @click="handleChangeStatus(activity.activityId)"
                                         class="px-2.5 md:px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs md:text-sm">
                                         Hoàn thành
                                     </button>
+                                    <span v-else class="text-gray-400 text-xs">---</span>
                                 </td>
                                 <td class="px-3 py-2 text-xs md:text-sm">
                                     <div class="flex flex-wrap gap-2">
@@ -99,11 +101,11 @@
                                             class="px-2.5 md:px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-xs md:text-sm">
                                             Xem
                                         </router-link>
-                                        <router-link :to="`/activities/update/${activity.activityId}`"
+                                        <router-link v-if="canModifyActivity" :to="`/activities/update/${activity.activityId}`"
                                             class="px-2.5 md:px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs md:text-sm">
                                             Sửa
                                         </router-link>
-                                        <button @click="openConfirm(activity.activityId)"
+                                        <button v-if="canModifyActivity" @click="openConfirm(activity.activityId)"
                                             class="px-2.5 md:px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs md:text-sm">
                                             Xóa
                                         </button>
@@ -125,8 +127,9 @@
     </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { useToast } from "@/composables/useToast";
+import { useAuth } from "@/composables/useAuth";
 import { getAllDeanery } from "@/services/deaneryService";
 import { deleteActivity, getAllActivitiesByDeaneryId, updateStatusActivity } from "@/services/activityService";
 import type { DeaneryDto } from "@/types/deanery.type";
@@ -135,6 +138,7 @@ import type { ApiResponse } from "@/types/api.type";
 import { formatDate } from "@/utils/dateFormat";
 
 const { showToast } = useToast();
+const { canModifyActivity, canAccessAttendance } = useAuth();
 const deaneries = ref<DeaneryDto[]>([]);
 const activities = ref<ActivityDto[]>([]);
 const selectedDeaneryId = ref<number | "">("");
