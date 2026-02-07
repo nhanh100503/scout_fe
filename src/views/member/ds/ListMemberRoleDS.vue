@@ -80,6 +80,10 @@
                                             class="px-2.5 md:px-3 py-1 bg-emerald-500 text-white rounded hover:bg-emerald-600 text-xs md:text-sm">
                                             Cập nhật đẳng thứ
                                         </button>
+                                        <button @click="openRankHistory(member)"
+                                            class="px-2.5 md:px-3 py-1 bg-teal-500 text-white rounded hover:bg-teal-600 text-xs md:text-sm">
+                                            Lịch sử cập nhật đẳng thứ
+                                        </button>
                                         <router-link :to="`/members/detail/ds/${member.memberId}`"
                                             class="px-2.5 md:px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-xs md:text-sm">
                                             Xem
@@ -105,6 +109,8 @@
         </div>
         <AssignRankModal :show="showAssignRank" :member-id="selectedMemberId" @close="showAssignRank = false"
             @success="fetchMembers" />
+        <RankHistoryModal :show="showRankHistory" :member-id="selectedMemberId" :member-name="selectedMemberName"
+            @close="showRankHistory = false" />
     </div>
 </template>
 <script setup lang="ts">
@@ -114,11 +120,14 @@ import { deleteMemberById, getAllMemberRoleDS } from "@/services/memberService";
 import { formatDate } from "@/utils/dateFormat";
 import { useToast } from "@/composables/useToast";
 import AssignRankModal from "@/components/member/AssignRankModal.vue";
+import RankHistoryModal from "@/components/member/RankHistoryModal.vue";
 
 const members = ref<MemberDto[]>([]);
 const showConfirm = ref(false);
 const showAssignRank = ref(false);
+const showRankHistory = ref(false);
 const selectedMemberId = ref<number>(0);
+const selectedMemberName = ref<string>("");
 const deleteId = ref<number | null>(null);
 const { toast, showToast } = useToast();
 
@@ -164,6 +173,12 @@ async function confirmDelete() {
 function openAssignRank(memberId: number) {
     selectedMemberId.value = memberId;
     showAssignRank.value = true;
+}
+
+function openRankHistory(member: MemberDto) {
+    selectedMemberId.value = member.memberId;
+    selectedMemberName.value = member.name;
+    showRankHistory.value = true;
 }
 
 onMounted(() => {

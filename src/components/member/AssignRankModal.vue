@@ -28,9 +28,20 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Minh chứng (Tối đa 3)</label>
-                    <input type="file" multiple @change="handleFileChange" accept="image/*"
+                    <input type="file" ref="fileInput" @change="handleFileChange" accept="image/*"
                         class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
-                    <p class="mt-1 text-xs text-gray-500">Chỉ chấp nhận file ảnh.</p>
+                    <p class="mt-1 text-xs text-gray-500">Chỉ chấp nhận file ảnh. Bạn đã chọn {{ form.evidenceFiles.length }}/3 ảnh.</p>
+                    
+                    <div v-if="form.evidenceFiles.length > 0" class="mt-2 space-y-2">
+                        <div v-for="(file, index) in form.evidenceFiles" :key="index" class="flex items-center justify-between p-2 bg-gray-50 rounded-md border border-gray-200">
+                            <span class="text-xs text-gray-600 truncate max-w-[200px]">{{ file.name }}</span>
+                            <button type="button" @click="removeFile(index)" class="text-red-500 hover:text-red-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4">
@@ -75,6 +86,8 @@ const form = ref({
     evidenceFiles: [] as File[]
 });
 
+const fileInput = ref<HTMLInputElement | null>(null);
+
 onMounted(async () => {
     try {
         const res = await getAllRanksTypeFalse();
@@ -87,15 +100,24 @@ onMounted(async () => {
 });
 
 function handleFileChange(event: any) {
-    const files = Array.from(event.target.files) as File[];
-    if (files.length > 3) {
+    const selectedFiles = Array.from(event.target.files) as File[];
+    const totalFiles = form.value.evidenceFiles.length + selectedFiles.length;
+    
+    if (totalFiles > 3) {
         showToast("Chỉ được chọn tối đa 3 ảnh minh chứng", "warning");
-        event.target.value = "";
-        form.value.evidenceFiles = [];
-        return;
+    } else {
+        form.value.evidenceFiles = [...form.value.evidenceFiles, ...selectedFiles];
     }
-    form.value.evidenceFiles = files;
+
+    // Clear the input so the same file can be selected again if removed
+    if (fileInput.value) {
+        fileInput.value.value = "";
+    }
 }
+
+const removeFile = (index: number) => {
+    form.value.evidenceFiles.splice(index, 1);
+};
 
 async function handleSubmit() {
     if (!selectedRank.value) {

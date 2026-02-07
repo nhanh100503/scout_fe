@@ -8,9 +8,7 @@ export interface RankHistoryDto {
     rankId: number;
     assignerId: number;
     notes: string;
-    evidenceUrl1: string;
-    evidenceUrl2: string;
-    evidenceUrl3: string;
+    evidenceUrls: [];
     createdAt: string;
     member?: {
         memberId: number;
@@ -47,7 +45,7 @@ export async function assignRank(payload: AssignRankRequest): Promise<ApiRespons
         });
     }
 
-    const res: AxiosResponse<ApiResponse<RankHistoryDto>> = await apiClient.post("/rankHistory/assign", formData, {
+    const res: AxiosResponse<ApiResponse<RankHistoryDto>> = await apiClient.post("/rank-history/assign", formData, {
         headers: {
             "Content-Type": "multipart/form-data",
         },
@@ -56,6 +54,6 @@ export async function assignRank(payload: AssignRankRequest): Promise<ApiRespons
 }
 
 export async function getRankHistory(memberId: number): Promise<ApiResponse<RankHistoryDto[]>> {
-    const res: AxiosResponse<ApiResponse<RankHistoryDto[]>> = await apiClient.get(`/rankHistory/${memberId}`);
+    const res: AxiosResponse<ApiResponse<RankHistoryDto[]>> = await apiClient.get(`/rank-history/${memberId}`);
     return res.data;
 }
