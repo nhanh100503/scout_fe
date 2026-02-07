@@ -94,6 +94,55 @@ export interface MemberRoleHTCreateRequest {
     majors?: MajorRequest[];
 }
 
+export interface MemberRoleDTCreateRequest {
+    name: string;
+    identify: string;
+    phone: string;
+    email: string;
+    birthday: string;
+    startYear: string;
+    pledgeYear: string;
+    address: string;
+    career: string;
+    placeOfBirth: string;
+    otherResponsibility: string;
+    parishId: number | null;
+    federationId: number | null;
+    team: string;
+
+    deaneryId: number | null;
+    genderId: number | null;
+    roleId: number;
+    religionId: number | null;
+    responsibilityId: number | null;
+
+    majors?: MajorRequest[];
+}
+
+export interface MemberRoleDTUpdateRequest {
+    name: string;
+    identify: string;
+    phone: string;
+    email: string;
+    birthday: string;
+    startYear: string;
+    pledgeYear: string;
+    address: string;
+    career: string;
+    placeOfBirth: string;
+    otherResponsibility: string;
+    parishId: number | null;
+    federationId: number | null;
+    team: string;
+
+    deaneryId: number | null;
+    genderId: number | null;
+    roleId: number;
+    religionId: number | null;
+    responsibilityId: number | null;
+
+    majors?: MajorRequest[];
+}
 
 export type ValidationErrorMember = Record<string, string>;
 

@@ -15,6 +15,11 @@ export const ROUTER_PATHS = {
     DETAIL_MEMBER_HT: '/members/detail/ht/:memberId',
     UPDATE_MEMBER_HT: '/members/update/ht/:memberId',
 
+    MEMBERS_DT: '/members/dt',
+    ADD_MEMBER_DT: '/members/add/dt',
+    DETAIL_MEMBER_DT: '/members/detail/dt/:memberId',
+    UPDATE_MEMBER_DT: '/members/update/dt/:memberId',
+
     STATISTICS_DS: '/statistics/ds',
     STATISTICS_HT: '/statistics/ht',
 
