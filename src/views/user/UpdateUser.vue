@@ -53,13 +53,10 @@
                         <label class="block text-sm font-medium text-gray-700">Vai trò <span
                                 class="text-red-500">*
                             </span></label>
-                        <select v-model="form.roles" multiple :class="inputClass(errors.roles)"
-                            class="mt-1 w-full border rounded-md px-3 py-2">
-                            <option v-for="role in roles" :key="role.roleId" :value="role.name">
-                                {{ role.name }}
-                            </option>
-                        </select>
-                        <p class="mt-1 text-xs text-gray-500">Giữ Ctrl (hoặc Cmd) để chọn nhiều vai trò</p>
+                        <VueMultiselect v-model="form.roles" :options="roles.map(r => r.name)" :multiple="true"
+                            :close-on-select="false" :clear-on-select="false" :preserve-search="true"
+                            placeholder="Chọn vai trò" :class="inputClass(errors.roles)">
+                        </VueMultiselect>
                         <p v-if="errors.roles" class="mt-1 text-xs text-red-500 break-words">
                             {{ errors.roles }}
                         </p>
@@ -76,6 +73,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import VueMultiselect from "vue-multiselect";
+import "vue-multiselect/dist/vue-multiselect.css";
 import { useRoute, useRouter } from "vue-router";
 import { getAllGenders } from "@/services/genderService";
 import { getAllRoles } from "@/services/roleService";
