@@ -76,6 +76,10 @@
                                 </td>
                                 <td class="px-3 md:px-4 py-2 text-xs md:text-sm">
                                     <div class="flex flex-wrap gap-2">
+                                        <button @click="openAssignRank(member.memberId)"
+                                            class="px-2.5 md:px-3 py-1 bg-emerald-500 text-white rounded hover:bg-emerald-600 text-xs md:text-sm">
+                                            Cập nhật đẳng thứ
+                                        </button>
                                         <router-link :to="`/members/detail/ds/${member.memberId}`"
                                             class="px-2.5 md:px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-xs md:text-sm">
                                             Xem
@@ -99,6 +103,8 @@
                 </div>
             </div>
         </div>
+        <AssignRankModal :show="showAssignRank" :member-id="selectedMemberId" @close="showAssignRank = false"
+            @success="fetchMembers" />
     </div>
 </template>
 <script setup lang="ts">
@@ -107,9 +113,12 @@ import type { MemberDto } from "@/types/member.type";
 import { deleteMemberById, getAllMemberRoleDS } from "@/services/memberService";
 import { formatDate } from "@/utils/dateFormat";
 import { useToast } from "@/composables/useToast";
+import AssignRankModal from "@/components/member/AssignRankModal.vue";
 
 const members = ref<MemberDto[]>([]);
 const showConfirm = ref(false);
+const showAssignRank = ref(false);
+const selectedMemberId = ref<number>(0);
 const deleteId = ref<number | null>(null);
 const { toast, showToast } = useToast();
 
@@ -150,6 +159,11 @@ async function confirmDelete() {
     } catch (error: any) {
         showToast(error.message, "error")
     }
+}
+
+function openAssignRank(memberId: number) {
+    selectedMemberId.value = memberId;
+    showAssignRank.value = true;
 }
 
 onMounted(() => {

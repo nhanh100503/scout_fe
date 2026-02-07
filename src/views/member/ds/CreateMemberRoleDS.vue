@@ -65,6 +65,13 @@
                             </p>
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-gray-700">Email</label>
+                            <input v-model="form.email" type="email" :class="inputClass(errors.email)" />
+                            <p v-if="errors.email" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.email }}
+                            </p>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-700">Giới tính <span
                                     class="text-red-500">*
                                 </span></label>
@@ -200,6 +207,7 @@ import { useToast } from "@/composables/useToast";
 import { inputClass } from "@/utils/inputClass";
 const form = ref<MemberRoleDSCreateRequest>({
     name: "",
+    email: "",
     birthday: "",
     startYear: "",
     pledgeYear: "",

@@ -10,6 +10,7 @@ import { FederationDto } from "./federation.type";
 
 export interface MemberRoleDSCreateRequest {
     name: string;
+    email?: string;
     birthday: string;
     startYear: string;
     pledgeYear: string;
@@ -28,6 +29,7 @@ export interface MemberRoleDSCreateRequest {
 
 export interface MemberRoleDSUpdateRequest {
     name: string;
+    email?: string;
     birthday: string;
     startYear: string;
     pledgeYear: string;

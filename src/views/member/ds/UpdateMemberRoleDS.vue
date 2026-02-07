@@ -65,6 +65,13 @@
                             </p>
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-gray-700">Email</label>
+                            <input v-model="form.email" type="email" :class="inputClass(errors.email)" />
+                            <p v-if="errors.email" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.email }}
+                            </p>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-700">Giới tính <span
                                     class="text-red-500">*
                                 </span></label>
@@ -207,6 +214,7 @@ const memberId = Number(route.params.memberId);
 
 const form = ref<MemberRoleDSUpdateRequest>({
     name: "",
+    email: "",
     birthday: "",
     startYear: "",
     pledgeYear: "",
@@ -259,6 +267,7 @@ onMounted(async () => {
             form.value = {
                 ...form.value,
                 name: m.name,
+                email: m.email || "",
                 birthday: formattedBirthday,
                 startYear: m.startYear,
                 pledgeYear: m.pledgeYear,
