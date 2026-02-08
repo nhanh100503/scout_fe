@@ -1,6 +1,6 @@
 <template>
-    <div v-if="show" class="fixed inset-0 flex items-center justify-center z-50 bg-white bg-opacity-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 border border-gray-200">
+    <div v-if="show" class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm" @click="$emit('close')">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 border border-gray-200" @click.stop>
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-emerald-700">Cập nhật đẳng thứ</h3>
                 <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700">
@@ -31,7 +31,7 @@
                     <input type="file" ref="fileInput" @change="handleFileChange" accept="image/*"
                         class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
                     <p class="mt-1 text-xs text-gray-500">Chỉ chấp nhận file ảnh. Bạn đã chọn {{ form.evidenceFiles.length }}/3 ảnh.</p>
-                    
+
                     <div v-if="form.evidenceFiles.length > 0" class="mt-2 space-y-2">
                         <div v-for="(file, index) in form.evidenceFiles" :key="index" class="flex items-center justify-between p-2 bg-gray-50 rounded-md border border-gray-200">
                             <span class="text-xs text-gray-600 truncate max-w-[200px]">{{ file.name }}</span>
@@ -102,7 +102,7 @@ onMounted(async () => {
 function handleFileChange(event: any) {
     const selectedFiles = Array.from(event.target.files) as File[];
     const totalFiles = form.value.evidenceFiles.length + selectedFiles.length;
-    
+
     if (totalFiles > 3) {
         showToast("Chỉ được chọn tối đa 3 ảnh minh chứng", "warning");
     } else {

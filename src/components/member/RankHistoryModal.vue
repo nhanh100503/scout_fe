@@ -1,6 +1,6 @@
 <template>
-    <div v-if="show" class="fixed inset-0 flex items-center justify-center z-50 bg-white bg-opacity-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl p-6 border border-gray-200 flex flex-col max-h-[90vh]">
+    <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" @click="$emit('close')">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl p-6 border border-gray-200 flex flex-col max-h-[90vh]" @click.stop>
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-emerald-700">Lịch sử đẳng thứ - {{ memberName }}</h3>
                 <button @click="$emit('close')" class="text-gray-500 hover:text-gray-700">
@@ -63,7 +63,7 @@
     </div>
 
     <!-- Image Modal -->
-    <div v-if="showImageModal" class="fixed inset-0 flex items-center justify-center z-50 bg-white bg-opacity-75" @click="closeImageModal">
+    <div v-if="showImageModal" class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm" @click="closeImageModal">
         <div class="bg-white rounded-lg shadow-xl p-6 max-w-4xl max-h-[90vh] overflow-auto" @click.stop>
             <div class="flex justify-between items-center mb-4">
                 <button @click="closeImageModal" class="text-gray-500 hover:text-gray-700">
