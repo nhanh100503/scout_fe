@@ -30,6 +30,25 @@ export interface ActivityDto {
     status: boolean;
     attendances?: AttendanceDto[];
     comments?: CommentDto[];
+    logs?: ActivityLogDto[];
+}
+
+export interface ActivityImageDto {
+    imageId: number;
+    imageUrl: string;
+    logId: number;
+}
+
+export interface ActivityLogDto {
+    logId: number;
+    title?: string;
+    content: string;
+    activityId: number;
+    createdBy: number;
+    author?: MemberDto;
+    images?: ActivityImageDto[];
+    createdAt: string;
+    updatedAt: string;
 }
 
 export type ValidationErrorActivity = Record<string, string>;
