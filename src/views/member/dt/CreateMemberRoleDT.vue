@@ -1,7 +1,7 @@
 <template>
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-4xl mx-auto w-full p-6 flex-1 flex flex-col">
-            <h2 class="text-xl font-semibold mb-4 text-emerald-700">Tạo đoàn sinh mới</h2>
+            <h2 class="text-xl font-semibold mb-4 text-emerald-700">Tạo đạo trưởng mới</h2>
             <form class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
                 <div class="flex-1 overflow-y-auto space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -9,7 +9,7 @@
                             <label class="block text-sm font-medium text-gray-700">Châu <span class="text-red-500">*
                                 </span></label>
                             <select v-model="form.deaneryId" :class="inputClass(errors.deaneryId)" @change="onDeaneryChange">
-                                <option value="">-- Chọn châu --</option>
+                                <option value="" disabled>-- Chọn châu --</option>
                                 <option v-for="item in deaneries" :key="item.deaneryId" :value="item.deaneryId">
                                     {{ item.name }}
                                 </option>
@@ -22,7 +22,7 @@
                             <label class="block text-sm font-medium text-gray-700">Đạo <span class="text-red-500">*
                                 </span></label>
                             <select v-model="form.parishId" :class="inputClass(errors.parishId)" @change="onParishChange">
-                                <option value="">-- Chọn đạo --</option>
+                                <option value="" disabled>-- Chọn đạo --</option>
                                 <option v-for="item in parishes" :key="item.parishId" :value="item.parishId">
                                     {{ item.name }}
                                 </option>
@@ -36,7 +36,7 @@
                                     class="text-red-500">*
                                 </span></label>
                             <select v-model="form.federationId" :class="inputClass(errors.federationId)">
-                                <option value="">-- Chọn liên đoàn --</option>
+                                <option value="" disabled>-- Chọn liên đoàn --</option>
                                 <option v-for="item in federations" :key="item.federationId" :value="item.federationId">
                                     {{ item.name }}
                                 </option>
@@ -54,7 +54,7 @@
                             </p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Họ và tên <span
                                     class="text-red-500">*
@@ -65,18 +65,11 @@
                             </p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Email</label>
-                            <input v-model="form.email" type="email" :class="inputClass(errors.email)" />
-                            <p v-if="errors.email" class="mt-1 text-xs text-red-500 break-words">
-                                {{ errors.email }}
-                            </p>
-                        </div>
-                        <div>
                             <label class="block text-sm font-medium text-gray-700">Giới tính <span
                                     class="text-red-500">*
                                 </span></label>
                             <select v-model="form.genderId" :class="inputClass(errors.genderId)">
-                                <option value="">-- Chọn giới tính --</option>
+                                <option value="" disabled>-- Chọn giới tính --</option>
                                 <option v-for="item in genders" :key="item.genderId" :value="item.genderId">
                                     {{ item.name }}
                                 </option>
@@ -85,6 +78,8 @@
                                 {{ errors.genderId }}
                             </p>
                         </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Ngày sinh <span
                                     class="text-red-500">*
@@ -94,19 +89,76 @@
                                 {{ errors.birthday }}
                             </p>
                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nơi sinh <span class="text-red-500">*
+                                </span></label>
+                            <input v-model="form.placeOfBirth" type="text" :class="inputClass(errors.placeOfBirth)" />
+                            <p v-if="errors.placeOfBirth" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.placeOfBirth }}
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Tôn giáo <span class="text-red-500">*
-                            </span></label>
-                        <select v-model="form.religionId" :class="inputClass(errors.religionId)">
-                            <option value="">-- Chọn tôn giáo --</option>
-                            <option v-for="item in religions" :key="item.religionId" :value="item.religionId">
-                                {{ item.name }}
-                            </option>
-                        </select>
-                        <p v-if="errors.religionId" class="mt-1 text-xs text-red-500 break-words">
-                            {{ errors.religionId }}
-                        </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Căn cước công dân <span
+                                    class="text-red-500">*
+                                </span></label>
+                            <input v-model="form.identify" type="text" :class="inputClass(errors.identify)" />
+                            <p v-if="errors.identify" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.identify }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Email <span class="text-red-500">*
+                                </span></label>
+                            <input v-model="form.email" type="text" :class="inputClass(errors.email)" />
+                            <p v-if="errors.email" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.email }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Số điện thoại <span
+                                    class="text-red-500">*
+                                </span></label>
+                            <input v-model="form.phone" type="text" :class="inputClass(errors.phone)" />
+                            <p v-if="errors.phone" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.phone }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Địa chỉ <span class="text-red-500">*
+                                </span></label>
+                            <input v-model="form.address" type="text" :class="inputClass(errors.address)" />
+                            <p v-if="errors.address" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.address }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Chuyên môn <span
+                                    class="text-red-500">*
+                                </span></label>
+                            <input v-model="form.career" type="text" :class="inputClass(errors.career)" />
+                            <p v-if="errors.career" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.career }}
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tôn giáo <span class="text-red-500">*
+                                </span></label>
+                            <select v-model="form.religionId" :class="inputClass(errors.religionId)">
+                                <option value="" disabled>-- Chọn tôn giáo --</option>
+                                <option v-for="item in religions" :key="item.religionId" :value="item.religionId">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                            <p v-if="errors.religionId" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.religionId }}
+                            </p>
+                        </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -128,53 +180,64 @@
                             </p>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Đã từng là đoàn sinh các ngành <span
-                                class="text-red-500">*
-                            </span></label>
-                        <div class="flex flex-wrap gap-4 mt-2">
-                            <label v-for="item in majors" :key="item.majorId">
-                                <input type="checkbox" :value="item.majorId" v-model="selectedPastMajors" />
-                                {{ item.name }}
-                            </label>
-                            <p v-if="errors.majors" class="mt-1 text-xs text-red-500 break-words">
-                                {{ errors.majors }}
-                            </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Đã từng là đoàn sinh các ngành
+                                <span class="text-red-500">*
+                                </span></label>
+                            <div class="flex flex-wrap gap-4 mt-2">
+                                <label v-for="item in majors" :key="item.majorId">
+                                    <input type="checkbox" :value="item.majorId" v-model="selectedPastMajors" />
+                                    {{ item.name }}
+                                </label>
+                                <p v-if="errors.majors" class="mt-1 text-xs text-red-500 break-words">
+                                    {{ errors.majors }}
+                                </p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Ngành đang sinh hoạt <span
+                                    class="text-red-500">*
+                                </span></label>
+                            <select v-model="currentMajorId"
+                                class="mt-1 w-full border border-gray-300 rounded-md px-3 py-2">
+                                <option value="" disabled>-- Chọn ngành hiện tại --</option>
+                                <option v-for="item in majors" :key="item.majorId" :value="item.majorId">
+                                    {{ item.name }}
+                                </option>
+                            </select>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Ngành đang sinh hoạt <span
-                                class="text-red-500">*
-                            </span></label>
-                        <select v-model="currentMajorId"
-                            class="mt-1 w-full border border-gray-300 rounded-md px-3 py-2">
-                            <option value="null">-- Chọn ngành hiện tại --</option>
-                            <option v-for="item in majors" :key="item.majorId" :value="item.majorId">
-                                {{ item.name }}
-                            </option>
-                            <p v-if="errors.currentMajorId" class="mt-1 text-xs text-red-500 break-words">
-                                {{ errors.currentMajorId }}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Trách vụ (Chọn ngành đang sinh hoạt
+                                trước)</label>
+                            <select v-model="form.responsibilityId" :class="inputClass(errors.responsibilityId)">
+                                <option value="" disabled>-- Chọn trách vụ --</option>
+                                <option v-for="item in responsibilities" :key="item.responsibilityId"
+                                    :value="item.responsibilityId">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                            <p v-if="errors.responsibilityId" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.responsibilityId }}
                             </p>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Trách vụ <span class="text-red-500">*
-                            </span></label>
-                        <select v-model="form.responsibilityId" :class="inputClass(errors.responsibilityId)">
-                            <option value="">-- Chọn trách vụ --</option>
-                            <option v-for="item in responsibilities" :key="item.responsibilityId"
-                                :value="item.responsibilityId">
-                                {{ item.name }}
-                            </option>
-                        </select>
-                        <p v-if="errors.responsibilityId" class="mt-1 text-xs text-red-500 break-words">
-                            {{ errors.responsibilityId }}
-                        </p>
+                        </div>
+                        <div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Trách vụ khác</label>
+                                <input v-model="form.otherResponsibility" type="text"
+                                    :class="inputClass(errors.otherResponsibility)" />
+                                <p v-if="errors.otherResponsibility" class="mt-1 text-xs text-red-500 break-words">
+                                    {{ errors.otherResponsibility }}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="pt-4">
                     <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">
-                        Lưu đoàn sinh
+                        Lưu đạo trưởng
                     </button>
                 </div>
             </form>
@@ -191,11 +254,11 @@ import { MajorDto } from "@/types/major.type";
 import { getAllMajor } from "@/services/majorService";
 import { ResponsibilityDto } from "@/types/responsibility.type";
 import { watch } from "vue";
-import { getAllResponsibilitiesDSByMajorId } from "@/services/responsibilityService";
+import { getAllResponsibilitiesDTByMajorId } from "@/services/responsibilityService";
 import { GenderDto } from "@/types/gender.type";
 import { getAllGenders } from "@/services/genderService";
-import { MemberRoleDSCreateRequest, ValidationErrorMember } from "@/types/member.type";
-import { createMemberRoleDS } from "@/services/memberService";
+import { MemberRoleDTCreateRequest, ValidationErrorMember } from "@/types/member.type";
+import { createMemberRoleDT } from "@/services/memberService";
 import { DeaneryDto } from "@/types/deanery.type";
 import { ParishDto } from "@/types/parish.type";
 import { FederationDto } from "@/types/federation.type";
@@ -205,9 +268,8 @@ import { ApiResponse } from "@/types/api.type";
 import router from "@/routers";
 import { useToast } from "@/composables/useToast";
 import { inputClass } from "@/utils/inputClass";
-const form = ref<MemberRoleDSCreateRequest>({
+const form = ref<MemberRoleDTCreateRequest>({
     name: "",
-    email: "",
     birthday: "",
     startYear: "",
     pledgeYear: "",
@@ -216,10 +278,17 @@ const form = ref<MemberRoleDSCreateRequest>({
     team: "",
     deaneryId: null,
     genderId: null,
-    roleId: 1,
+    roleId: 0,
     religionId: null,
     responsibilityId: null,
-    majors: []
+    majors: [],
+    address: "",
+    career: "",
+    identify: "",
+    phone: "",
+    email: "",
+    placeOfBirth: "",
+    otherResponsibility: ""
 });
 
 const deaneries = ref<DeaneryDto[]>([]);
@@ -230,10 +299,7 @@ const majors = ref<MajorDto[]>([]);
 const responsibilities = ref<ResponsibilityDto[]>([]);
 const genders = ref<GenderDto[]>([])
 const errors = ref<ValidationErrorMember>({});
-const selectedPastMajors = ref<number[]>([]);
-const currentMajorId = ref<number | "">("");
 const { toast, showToast } = useToast();
-
 
 onMounted(async () => {
     try {
@@ -249,26 +315,34 @@ onMounted(async () => {
         const resGender = await getAllGenders();
         genders.value = resGender.data;
     } catch (error) {
-        showToast(error, "error");
+        showToast(error);
     }
 });
 
+const selectedPastMajors = ref<number[]>([]);
+const currentMajorId = ref<number | "">("");
+
 watch(selectedPastMajors, (newVal) => {
-    const current = form.value.majors.find(m => m.now);
+    const current = form.value.majors?.find(m => m.now);
     form.value.majors = current ? [current] : [];
     newVal.forEach(id => {
         if (current && current.majorId === id) return;
         const major = majors.value.find(m => m.majorId === id);
-        form.value.majors.push({
-            majorId: id,
-            name: major ? major.name : "",
-            now: false
-        });
+        if (form.value.majors)
+            form.value.majors.push({
+                majorId: id,
+                name: major ? major.name : "",
+                now: false
+            });
     });
 });
 
 watch(currentMajorId, async (newMajorId) => {
-    form.value.majors = form.value.majors.filter(m => !m.now);
+    if (form.value.majors)
+        form.value.majors = form.value.majors.filter(m => !m.now);
+    else
+        form.value.majors = [];
+
     if (newMajorId) {
         const major = majors.value.find(m => m.majorId === newMajorId);
         const existing = form.value.majors.find(m => m.majorId === Number(newMajorId));
@@ -282,15 +356,14 @@ watch(currentMajorId, async (newMajorId) => {
             });
         }
         try {
-            const res = await getAllResponsibilitiesDSByMajorId(Number(newMajorId));
+            const res = await getAllResponsibilitiesDTByMajorId(Number(newMajorId));
             responsibilities.value = res.data;
-            console.log(responsibilities.value);
         } catch (error) {
             responsibilities.value = [];
         }
     } else {
         responsibilities.value = [];
-        form.value.responsibilityId = 0;
+        form.value.responsibilityId = null;
     }
 });
 
@@ -325,9 +398,9 @@ const onParishChange = async () => {
 };
 
 async function handleSubmit() {
-    errors.value = {};
-
+    console.log(form.value);
     const birthdayYear = form.value.birthday ? new Date(form.value.birthday).getFullYear() : null;
+
     if (form.value.startYear) {
         if (!/^\d{4}$/.test(String(form.value.startYear))) {
             errors.value.startYear = "Năm bắt đầu phải gồm 4 chữ số";
@@ -349,12 +422,14 @@ async function handleSubmit() {
             return;
         }
     }
+
     try {
-        const res = await createMemberRoleDS(form.value);
+        const res = await createMemberRoleDT(form.value);
         if (res.code === 201) {
-            showToast(res.message, "success")
-            router.push("/members/ds");
+            showToast(res.message, "success");
+            router.push("/members/dt")
         }
+
     } catch (error: any) {
         const apiRes: ApiResponse<any> = error;
         if (apiRes.code === 400 && apiRes.data) {
@@ -363,5 +438,4 @@ async function handleSubmit() {
         showToast(apiRes.message, "error");
     }
 }
-
 </script>

@@ -48,7 +48,7 @@ async function handleSubmit() {
     errors.value = {};
     try {
         const res = await createDeanery(form.value);
-        if (res.code === 200) {
+        if (res.code === 201) {
             showToast(res.message, "success");
             router.push("/deaneries");
         }

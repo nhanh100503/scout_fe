@@ -1,6 +1,6 @@
 import apiClient from "@/tools/axios.tool";
 import { ApiResponse } from "@/types/api.type";
-import { MemberRoleDSCreateRequest, MemberDto, MemberRoleDSUpdateRequest, MemberRoleHTUpdateRequest } from "@/types/member.type";
+import { MemberRoleDSCreateRequest, MemberDto, MemberRoleDSUpdateRequest, MemberRoleHTUpdateRequest, MemberRoleDTCreateRequest, MemberRoleDTUpdateRequest } from "@/types/member.type";
 import { AxiosResponse } from "axios";
 
 export async function createMemberRoleDS(payload: MemberRoleDSCreateRequest): Promise<ApiResponse<MemberDto>> {
@@ -10,6 +10,11 @@ export async function createMemberRoleDS(payload: MemberRoleDSCreateRequest): Pr
 
 export async function createMemberRoleHT(payload: MemberRoleDSCreateRequest): Promise<ApiResponse<MemberDto>> {
     const res: AxiosResponse<ApiResponse<MemberDto>> = await apiClient.post("/members/ht", payload);
+    return res.data;
+}
+
+export async function createMemberRoleDT(payload: MemberRoleDTCreateRequest): Promise<ApiResponse<MemberDto>> {
+    const res: AxiosResponse<ApiResponse<MemberDto>> = await apiClient.post("/members/dt", payload);
     return res.data;
 }
 
@@ -28,6 +33,11 @@ export async function updateMemberRoleHT(memberId: number, payload: MemberRoleHT
     return res.data;
 }
 
+export async function updateMemberRoleDT(memberId: number, payload: MemberRoleDTUpdateRequest): Promise<ApiResponse<MemberDto>> {
+    const res: AxiosResponse<ApiResponse<MemberDto>> = await apiClient.put(`/members/dt/${memberId}`, payload);
+    return res.data;
+}
+
 export async function deleteMemberById(memberId: number): Promise<ApiResponse<MemberDto>> {
     const res: AxiosResponse<ApiResponse<MemberDto>> = await apiClient.delete(`/members/${memberId}`);
     return res.data;
@@ -40,6 +50,11 @@ export async function getAllMemberRoleDS(): Promise<ApiResponse<MemberDto[]>> {
 
 export async function getAllMemberRoleHT(): Promise<ApiResponse<MemberDto[]>> {
     const res: AxiosResponse<ApiResponse<MemberDto[]>> = await apiClient.get("/members/ht");
+    return res.data;
+}
+
+export async function getAllMemberRoleDT(): Promise<ApiResponse<MemberDto[]>> {
+    const res: AxiosResponse<ApiResponse<MemberDto[]>> = await apiClient.get("/members/dt");
     return res.data;
 }
 

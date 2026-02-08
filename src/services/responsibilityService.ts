@@ -17,3 +17,8 @@ export async function getAllResponsibilitiesHTByMajorId(majorId: number): Promis
     const res: AxiosResponse<ApiResponse<ResponsibilityDto[]>> = await apiClient.get(`/responsibilities/ht/${majorId}`);
     return res.data;
 }
+
+export async function getAllResponsibilitiesDTByMajorId(majorId: number): Promise<ApiResponse<ResponsibilityDto[]>> {
+    const res: AxiosResponse<ApiResponse<ResponsibilityDto[]>> = await apiClient.get(`/responsibilities/dt/${majorId}`);
+    return res.data;
+}

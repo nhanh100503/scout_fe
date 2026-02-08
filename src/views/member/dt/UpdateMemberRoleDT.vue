@@ -1,7 +1,7 @@
 <template>
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-4xl mx-auto w-full p-6 flex-1 flex flex-col">
-            <h2 class="text-xl font-semibold mb-4 text-emerald-700">Cập nhật huynh trưởng</h2>
+            <h2 class="text-xl font-semibold mb-4 text-emerald-700">Cập nhật đạo trưởng</h2>
             <form class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
                 <div class="flex-1 overflow-y-auto space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -237,7 +237,7 @@
                 </div>
                 <div class="pt-4">
                     <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">
-                        Cập nhật huynh trưởng
+                        Cập nhật đạo trưởng
                     </button>
                 </div>
             </form>
@@ -248,13 +248,13 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getMemberById, updateMemberRoleHT } from "@/services/memberService";
+import { getMemberById, updateMemberRoleDT } from "@/services/memberService";
 import { getAllDeanery } from "@/services/deaneryService";
 import { getAllReligion } from "@/services/religionService";
 import { getAllMajor } from "@/services/majorService";
-import { getAllResponsibilitiesHTByMajorId } from "@/services/responsibilityService";
+import { getAllResponsibilitiesDTByMajorId } from "@/services/responsibilityService";
 import { getAllGenders } from "@/services/genderService";
-import type { MemberDto, MemberRoleHTUpdateRequest, ValidationErrorMember } from "@/types/member.type";
+import type { MemberDto, MemberRoleDTUpdateRequest, ValidationErrorMember } from "@/types/member.type";
 import { DeaneryDto } from "@/types/deanery.type";
 import { ParishDto } from "@/types/parish.type";
 import { FederationDto } from "@/types/federation.type";
@@ -284,7 +284,7 @@ const genders = ref<GenderDto[]>([]);
 const selectedPastMajors = ref<number[]>([]);
 const currentMajorId = ref<number | "">("");
 
-const form = ref<MemberRoleHTUpdateRequest>({
+const form = ref<MemberRoleDTUpdateRequest>({
     name: "",
     birthday: "",
     startYear: "",
@@ -294,7 +294,7 @@ const form = ref<MemberRoleHTUpdateRequest>({
     team: "",
     deaneryId: null,
     genderId: null,
-    roleId: 2, // Mặc định là Huynh Trưởng
+    roleId: 0, 
     religionId: null,
     responsibilityId: null,
     majors: [],
@@ -309,7 +309,6 @@ const form = ref<MemberRoleHTUpdateRequest>({
 
 onMounted(async () => {
     try {
-        // Tải tất cả danh mục cùng lúc
         const [resDea, resRel, resMaj, resGen] = await Promise.all([
             getAllDeanery(),
             getAllReligion(),
@@ -322,12 +321,9 @@ onMounted(async () => {
         majors.value = resMaj.data;
         genders.value = resGen.data;
 
-        // Tải thông tin chi tiết Huynh trưởng
         const resMember = await getMemberById(memberId);
         if (resMember.code === 200) {
             const m: MemberDto = resMember.data;
-            
-            // Format ngày sinh cho input type="date"
             let formattedBirthday = "";
             if (m.birthday) {
                 formattedBirthday = m.birthday.split('T')[0];
@@ -353,11 +349,10 @@ onMounted(async () => {
                 genderId: m.gender?.genderId || null,
                 religionId: m.religion?.religionId || null,
                 responsibilityId: m.responsibility?.responsibilityId || null,
-                roleId: m.roles?.[0]?.roleId || 2,
+                roleId: m.roles?.[0]?.roleId || 0,
                 majors: m.majors || []
             };
 
-            // Load parishes and federations if deaneryId and parishId exist
             if (m.deaneryId) {
                 const resParishes = await getParishesByDeaneryId(m.deaneryId);
                 parishes.value = resParishes.data;
@@ -367,7 +362,6 @@ onMounted(async () => {
                 federations.value = resFederations.data;
             }
 
-            // Cập nhật trạng thái hiển thị trên Form
             selectedPastMajors.value = m.majors?.map(x => x.majorId) || [];
             const current = m.majors?.find(x => x.now);
             currentMajorId.value = current ? current.majorId : "";
@@ -377,47 +371,43 @@ onMounted(async () => {
     }
 });
 
-// Watch danh sách ngành đã qua
 watch(selectedPastMajors, (newVal) => {
     const currentId = Number(currentMajorId.value);
     
-    // Cập nhật mảng majors trong form, giữ lại 'name' từ danh sách gốc
-    form.value.majors = newVal.map(id => {
-        const master = majors.value.find(m => m.majorId === id);
-        return {
-            majorId: id,
-            name: master ? master.name : "",
-            now: id === currentId
-        };
-    });
+    if (form.value.majors) {
+        form.value.majors = newVal.map(id => {
+            const master = majors.value.find(m => m.majorId === id);
+            return {
+                majorId: id,
+                name: master ? master.name : "",
+                now: id === currentId
+            };
+        });
+    }
 
-    // Nếu ngành đang sinh hoạt bị bỏ tích khỏi danh sách ngành đã qua -> Reset ngành hiện tại
     if (currentId && !newVal.includes(currentId)) {
         currentMajorId.value = "";
     }
 });
 
-// Watch ngành đang sinh hoạt hiện tại
 watch(currentMajorId, async (newMajorId) => {
     const majorIdNum = Number(newMajorId);
 
-    // Cập nhật thuộc tính 'now'
-    form.value.majors.forEach(m => {
-        m.now = (m.majorId === majorIdNum);
-    });
+    if (form.value.majors) {
+        form.value.majors.forEach(m => {
+            m.now = (m.majorId === majorIdNum);
+        });
+    }
 
     if (newMajorId) {
-        // Tự động tích checkbox nếu chọn làm ngành hiện tại
         if (!selectedPastMajors.value.includes(majorIdNum)) {
             selectedPastMajors.value.push(majorIdNum);
         }
 
         try {
-            // Lấy danh sách trách vụ dành riêng cho Huynh trưởng theo ngành
-            const res = await getAllResponsibilitiesHTByMajorId(majorIdNum);
+            const res = await getAllResponsibilitiesDTByMajorId(majorIdNum);
             responsibilities.value = res.data;
             
-            // Nếu trách vụ cũ không thuộc ngành mới -> Reset trách vụ
             const exists = responsibilities.value.some(r => r.responsibilityId === form.value.responsibilityId);
             if (!exists) {
                 form.value.responsibilityId = null;
@@ -466,7 +456,6 @@ async function handleSubmit() {
     errors.value = {};
     const birthdayYear = form.value.birthday ? new Date(form.value.birthday).getFullYear() : null;
 
-    // Validate năm sinh hoạt
     if (form.value.startYear && birthdayYear) {
         if (Number(form.value.startYear) < birthdayYear) {
             errors.value.startYear = "Năm bắt đầu không được nhỏ hơn năm sinh";
@@ -482,20 +471,19 @@ async function handleSubmit() {
     }
 
     try {
-        // Chuẩn hóa dữ liệu majors đảm bảo có đủ name trước khi gửi đi
         const payload = {
             ...form.value,
-            majors: form.value.majors.map(m => ({
+            majors: form.value.majors ? form.value.majors.map(m => ({
                 majorId: m.majorId,
                 name: m.name,
                 now: m.now
-            }))
+            })) : []
         };
 
-        const res = await updateMemberRoleHT(memberId, payload);
+        const res = await updateMemberRoleDT(memberId, payload);
         if (res.code === 200) {
             showToast(res.message, "success");
-            router.push("/members/ht");
+            router.push("/members/dt");
         }
     } catch (error: any) {
         if (error.code === 400 && error.data) {

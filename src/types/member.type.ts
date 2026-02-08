@@ -10,6 +10,7 @@ import { FederationDto } from "./federation.type";
 
 export interface MemberRoleDSCreateRequest {
     name: string;
+    email?: string;
     birthday: string;
     startYear: string;
     pledgeYear: string;
@@ -19,7 +20,6 @@ export interface MemberRoleDSCreateRequest {
 
     deaneryId: number | null;
     genderId: number | null;
-    rankId: number | null;
     roleId: number;
     religionId: number | null;
     responsibilityId: number | null;
@@ -29,6 +29,7 @@ export interface MemberRoleDSCreateRequest {
 
 export interface MemberRoleDSUpdateRequest {
     name: string;
+    email?: string;
     birthday: string;
     startYear: string;
     pledgeYear: string;
@@ -38,7 +39,6 @@ export interface MemberRoleDSUpdateRequest {
 
     deaneryId: number | null;
     genderId: number | null;
-    rankId: number | null;
     roleId: number;
     religionId: number | null;
     responsibilityId: number | null;
@@ -64,7 +64,6 @@ export interface MemberRoleHTUpdateRequest {
 
     deaneryId: number | null;
     genderId: number | null;
-    rankId: number | null;
     roleId: number;
     religionId: number | null;
     responsibilityId: number | null;
@@ -90,7 +89,6 @@ export interface MemberRoleHTCreateRequest {
 
     deaneryId: number | null;
     genderId: number | null;
-    rankId: number | null;
     roleId: number;
     religionId: number | null;
     responsibilityId: number | null;
@@ -98,6 +96,55 @@ export interface MemberRoleHTCreateRequest {
     majors?: MajorRequest[];
 }
 
+export interface MemberRoleDTCreateRequest {
+    name: string;
+    identify: string;
+    phone: string;
+    email: string;
+    birthday: string;
+    startYear: string;
+    pledgeYear: string;
+    address: string;
+    career: string;
+    placeOfBirth: string;
+    otherResponsibility: string;
+    parishId: number | null;
+    federationId: number | null;
+    team: string;
+
+    deaneryId: number | null;
+    genderId: number | null;
+    roleId: number;
+    religionId: number | null;
+    responsibilityId: number | null;
+
+    majors?: MajorRequest[];
+}
+
+export interface MemberRoleDTUpdateRequest {
+    name: string;
+    identify: string;
+    phone: string;
+    email: string;
+    birthday: string;
+    startYear: string;
+    pledgeYear: string;
+    address: string;
+    career: string;
+    placeOfBirth: string;
+    otherResponsibility: string;
+    parishId: number | null;
+    federationId: number | null;
+    team: string;
+
+    deaneryId: number | null;
+    genderId: number | null;
+    roleId: number;
+    religionId: number | null;
+    responsibilityId: number | null;
+
+    majors?: MajorRequest[];
+}
 
 export type ValidationErrorMember = Record<string, string>;
 
@@ -115,6 +162,7 @@ export interface MemberDto {
     career: string;
     placeOfBirth?: string;
     otherResponsibility?: string;
+    deaneryId?: number;
     parishId?: number;
     federationId?: number;
     team: string;

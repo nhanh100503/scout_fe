@@ -9,6 +9,10 @@ import ListMemberRoleDS from '@/views/member/ds/ListMemberRoleDS.vue'
 import ListMemberRoleHT from '@/views/member/ht/ListMemberRoleHT.vue'
 import UpdateMemberRoleDS from '@/views/member/ds/UpdateMemberRoleDS.vue'
 import UpdateMemberRoleHT from '@/views/member/ht/UpdateMemberRoleHT.vue'
+import ListMemberRoleDT from '@/views/member/dt/ListMemberRoleDT.vue'
+import CreateMemberRoleDT from '@/views/member/dt/CreateMemberRoleDT.vue'
+import UpdateMemberRoleDT from '@/views/member/dt/UpdateMemberRoleDT.vue'
+import DetailMemberRoleDT from '@/views/member/dt/DetailMemberRoleDT.vue'
 import StatisticDS from '@/views/statistic/StatisticDS.vue'
 import StatisticHT from '@/views/statistic/StatisticHT.vue'
 import LoginView from '@/views/auth/LoginView.vue'
@@ -64,6 +68,11 @@ const routes = [
             { path: ROUTER_PATHS.ADD_MEMBER_HT, name: 'addMemberHT', component: CreateMemberRoleHT },
             { path: ROUTER_PATHS.DETAIL_MEMBER_HT, name: 'detailMemberHT', component: DetailMemberRoleHT },
             { path: ROUTER_PATHS.UPDATE_MEMBER_HT, name: 'updateMemberHT', component: UpdateMemberRoleHT },
+
+            { path: ROUTER_PATHS.MEMBERS_DT, name: 'membersRoleDT', component: ListMemberRoleDT },
+            { path: ROUTER_PATHS.ADD_MEMBER_DT, name: 'addMemberDT', component: CreateMemberRoleDT },
+            { path: ROUTER_PATHS.DETAIL_MEMBER_DT, name: 'detailMemberDT', component: DetailMemberRoleDT },
+            { path: ROUTER_PATHS.UPDATE_MEMBER_DT, name: 'updateMemberDT', component: UpdateMemberRoleDT },
 
             { path: ROUTER_PATHS.STATISTICS_DS, name: 'statictisMemberDS', component: StatisticDS },
             { path: ROUTER_PATHS.STATISTICS_HT, name: 'statictisMemberHT', component: StatisticHT },
