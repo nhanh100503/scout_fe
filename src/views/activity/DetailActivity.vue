@@ -570,8 +570,9 @@ const removeExistingImage = async (imageId: number) => {
     try {
         await deleteActivityImage(imageId);
         logForm.value.existingImages = logForm.value.existingImages.filter(img => img.imageId !== imageId);
+        console.log("Removed existing image:", logForm.value.existingImages);
         // Also refresh logs in background
-        loadActivityLogs();
+        await loadActivityLogs();
         showToast("Đã xóa ảnh", "success");
     } catch (error: any) {
         showToast("Lỗi xóa ảnh", "error");
