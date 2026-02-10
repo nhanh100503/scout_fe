@@ -48,6 +48,11 @@ export async function getAllMemberRoleDS(): Promise<ApiResponse<MemberDto[]>> {
     return res.data;
 }
 
+export async function getAllMembers(): Promise<ApiResponse<MemberDto[]>> {
+    const res: AxiosResponse<ApiResponse<MemberDto[]>> = await apiClient.get("/members");
+    return res.data;
+}
+
 export async function getAllMemberRoleHT(): Promise<ApiResponse<MemberDto[]>> {
     const res: AxiosResponse<ApiResponse<MemberDto[]>> = await apiClient.get("/members/ht");
     return res.data;

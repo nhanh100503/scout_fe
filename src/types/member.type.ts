@@ -16,7 +16,7 @@ export interface MemberRoleDSCreateRequest {
     pledgeYear: string;
     parishId: number | null;
     federationId: number | null;
-    team: string;
+    teamId: number;
 
     deaneryId: number | null;
     genderId: number | null;
@@ -35,7 +35,7 @@ export interface MemberRoleDSUpdateRequest {
     pledgeYear: string;
     parishId: number | null;
     federationId: number | null;
-    team: string;
+    teamId: number;
 
     deaneryId: number | null;
     genderId: number | null;
@@ -60,7 +60,7 @@ export interface MemberRoleHTUpdateRequest {
     otherResponsibility: string;
     parishId: number | null;
     federationId: number | null;
-    team: string;
+    teamId: number;
 
     deaneryId: number | null;
     genderId: number | null;
@@ -85,7 +85,7 @@ export interface MemberRoleHTCreateRequest {
     otherResponsibility: string;
     parishId: number | null;
     federationId: number | null;
-    team: string;
+    teamId: number;
 
     deaneryId: number | null;
     genderId: number | null;
@@ -110,7 +110,7 @@ export interface MemberRoleDTCreateRequest {
     otherResponsibility: string;
     parishId: number | null;
     federationId: number | null;
-    team: string;
+    teamId: number;
 
     deaneryId: number | null;
     genderId: number | null;
@@ -135,7 +135,7 @@ export interface MemberRoleDTUpdateRequest {
     otherResponsibility: string;
     parishId: number | null;
     federationId: number | null;
-    team: string;
+    teamId: number;
 
     deaneryId: number | null;
     genderId: number | null;
@@ -165,7 +165,7 @@ export interface MemberDto {
     deaneryId?: number;
     parishId?: number;
     federationId?: number;
-    team: string;
+    teamId: number;
     avatar?: string;
 
     deanery?: DeaneryDto;

@@ -5,6 +5,10 @@ export const ROUTER_PATHS = {
     PROFILE: '/profile',
 
 
+    LIST_TEAM: '/teams',
+    ADD_TEAM: '/teams/add',
+    UPDATE_TEAM: '/teams/update/:teamId',
+
     MEMBERS_DS: '/members/ds',
     ADD_MEMBER_DS: '/members/add/ds',
     DETAIL_MEMBER_DS: '/members/detail/ds/:memberId',
