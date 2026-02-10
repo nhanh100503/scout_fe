@@ -48,9 +48,14 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Đoàn <span class="text-red-500">*
                                 </span></label>
-                            <input v-model="form.team" type="text" :class="inputClass(errors.team)" />
-                            <p v-if="errors.team" class="mt-1 text-xs text-red-500 break-words">
-                                {{ errors.team }}
+                            <select v-model="form.teamId" :class="inputClass(errors.teamId)">
+                                <option :value="0" disabled>-- Chọn đoàn --</option>
+                                <option v-for="item in teams" :key="item.teamId" :value="item.teamId">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                            <p v-if="errors.teamId" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.teamId }}
                             </p>
                         </div>
                     </div>
@@ -261,9 +266,11 @@ import { MemberRoleDTCreateRequest, ValidationErrorMember } from "@/types/member
 import { createMemberRoleDT } from "@/services/memberService";
 import { DeaneryDto } from "@/types/deanery.type";
 import { ParishDto } from "@/types/parish.type";
-import { FederationDto } from "@/types/federation.type";
 import { getParishesByDeaneryId } from "@/services/parishService";
+import { FederationDto } from "@/types/federation.type";
 import { getFederationsByParishId } from "@/services/federationService";
+import { getTeamsByParishId } from "@/services/teamService";
+import { TeamDto } from "@/types/team.type";
 import { ApiResponse } from "@/types/api.type";
 import router from "@/routers";
 import { useToast } from "@/composables/useToast";
@@ -275,7 +282,7 @@ const form = ref<MemberRoleDTCreateRequest>({
     pledgeYear: "",
     parishId: null,
     federationId: null,
-    team: "",
+    teamId: 0,
     deaneryId: null,
     genderId: null,
     roleId: 0,
@@ -294,6 +301,7 @@ const form = ref<MemberRoleDTCreateRequest>({
 const deaneries = ref<DeaneryDto[]>([]);
 const parishes = ref<ParishDto[]>([]);
 const federations = ref<FederationDto[]>([]);
+const teams = ref<TeamDto[]>([]);
 const religions = ref<ReligionDto[]>([]);
 const majors = ref<MajorDto[]>([]);
 const responsibilities = ref<ResponsibilityDto[]>([]);
@@ -370,8 +378,10 @@ watch(currentMajorId, async (newMajorId) => {
 const onDeaneryChange = async () => {
     form.value.parishId = null;
     form.value.federationId = null;
+    form.value.teamId = 0;
     parishes.value = [];
     federations.value = [];
+    teams.value = [];
     
     if (form.value.deaneryId) {
         try {
@@ -385,12 +395,16 @@ const onDeaneryChange = async () => {
 
 const onParishChange = async () => {
     form.value.federationId = null;
+    form.value.teamId = 0;
     federations.value = [];
+    teams.value = [];
     
     if (form.value.parishId) {
         try {
             const res = await getFederationsByParishId(form.value.parishId);
             federations.value = res.data;
+            const resTeams = await getTeamsByParishId(form.value.parishId);
+            teams.value = resTeams.data;
         } catch (error) {
             showToast(error);
         }

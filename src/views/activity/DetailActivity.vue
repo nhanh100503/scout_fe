@@ -44,6 +44,51 @@
                     </div>
                 </div>
 
+                <!-- Team & Note Info -->
+                <div v-if="activity.team || activity.note" class="px-6 md:px-8 py-4 bg-gray-50 border-t border-gray-100">
+                    <div class="flex flex-wrap gap-6 text-sm text-gray-700">
+                        <div v-if="activity.team" class="flex items-center gap-2">
+                            <span class="font-medium text-gray-500">Đội/Nhóm:</span>
+                            <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-xs font-medium">{{ activity.team.name }}</span>
+                        </div>
+                        <div v-if="activity.note" class="flex items-center gap-2">
+                            <span class="font-medium text-gray-500">Ghi chú:</span>
+                            <span>{{ activity.note }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plan Rows Section -->
+                <div v-if="activity.planRows && activity.planRows.length > 0" class="px-6 md:px-8 py-6 bg-white border-t border-gray-100">
+                    <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">
+                        📋 Kế hoạch sinh hoạt
+                    </h3>
+                    <div class="overflow-x-auto rounded-lg border border-gray-200">
+                        <table class="min-w-full border-collapse">
+                            <thead class="bg-emerald-50">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-emerald-800 w-12">STT</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-emerald-800 w-28">Thời gian</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-emerald-800">Nội dung</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-emerald-800 w-32">Phụ trách</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-emerald-800 w-32">Vật dụng</th>
+                                    <th class="px-3 py-2 text-left text-xs font-semibold text-emerald-800 w-32">Ghi chú</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(row, index) in activity.planRows" :key="row.rowId" class="border-t border-gray-200 hover:bg-gray-50">
+                                    <td class="px-3 py-2 text-sm text-center text-gray-500">{{ index + 1 }}</td>
+                                    <td class="px-3 py-2 text-sm">{{ row.startTime || '—' }}</td>
+                                    <td class="px-3 py-2 text-sm">{{ row.content || '—' }}</td>
+                                    <td class="px-3 py-2 text-sm">{{ row.pic || '—' }}</td>
+                                    <td class="px-3 py-2 text-sm">{{ row.materials || '—' }}</td>
+                                    <td class="px-3 py-2 text-sm">{{ row.notes || '—' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Activity Logs (Journal) Section -->
                 <div class="px-6 md:px-8 py-6 bg-white border-t border-gray-100">
                     <div class="flex items-center justify-between mb-6">

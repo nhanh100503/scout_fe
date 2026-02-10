@@ -9,7 +9,7 @@
                             <label class="block text-sm font-medium text-gray-700">Châu <span class="text-red-500">*
                                 </span></label>
                             <select v-model="form.deaneryId" :class="inputClass(errors.deaneryId)" @change="onDeaneryChange">
-                                <option value="" disabled>-- Chọn châu --</option>
+                                <option :value="null" disabled>-- Chọn châu --</option>
                                 <option v-for="item in deaneries" :key="item.deaneryId" :value="item.deaneryId">
                                     {{ item.name }}
                                 </option>
@@ -22,7 +22,7 @@
                             <label class="block text-sm font-medium text-gray-700">Đạo <span class="text-red-500">*
                                 </span></label>
                             <select v-model="form.parishId" :class="inputClass(errors.parishId)" @change="onParishChange">
-                                <option value="" disabled>-- Chọn đạo --</option>
+                                <option :value="null" disabled>-- Chọn đạo --</option>
                                 <option v-for="item in parishes" :key="item.parishId" :value="item.parishId">
                                     {{ item.name }}
                                 </option>
@@ -36,7 +36,7 @@
                                     class="text-red-500">*
                                 </span></label>
                             <select v-model="form.federationId" :class="inputClass(errors.federationId)">
-                                <option value="" disabled>-- Chọn liên đoàn --</option>
+                                <option :value="null" disabled>-- Chọn liên đoàn --</option>
                                 <option v-for="item in federations" :key="item.federationId" :value="item.federationId">
                                     {{ item.name }}
                                 </option>
@@ -46,11 +46,16 @@
                             </p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Đoàn <span class="text-red-500">*
+                            <label class="block text-sm font-medium text-gray-700">Đội/Nhóm <span class="text-red-500">*
                                 </span></label>
-                            <input v-model="form.team" type="text" :class="inputClass(errors.team)" />
-                            <p v-if="errors.team" class="mt-1 text-xs text-red-500 break-words">
-                                {{ errors.team }}
+                            <select v-model="form.teamId" :class="inputClass(errors.teamId)">
+                                <option :value="0">-- Chọn đội/nhóm --</option>
+                                <option v-for="t in teams" :key="t.teamId" :value="t.teamId">
+                                    {{ t.name }}
+                                </option>
+                            </select>
+                            <p v-if="errors.teamId" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.teamId }}
                             </p>
                         </div>
                     </div>
@@ -262,8 +267,10 @@ import { createMemberRoleHT } from "@/services/memberService";
 import { DeaneryDto } from "@/types/deanery.type";
 import { ParishDto } from "@/types/parish.type";
 import { FederationDto } from "@/types/federation.type";
+import { TeamDto } from "@/types/team.type";
 import { getParishesByDeaneryId } from "@/services/parishService";
 import { getFederationsByParishId } from "@/services/federationService";
+import { getTeamsByDeaneryId } from "@/services/teamService";
 import { ApiResponse } from "@/types/api.type";
 import router from "@/routers";
 import { useToast } from "@/composables/useToast";
@@ -275,7 +282,7 @@ const form = ref<MemberRoleHTCreateRequest>({
     pledgeYear: "",
     parishId: null,
     federationId: null,
-    team: "",
+    teamId: 0,
     deaneryId: null,
     genderId: null,
     roleId: 2,
@@ -294,6 +301,7 @@ const form = ref<MemberRoleHTCreateRequest>({
 const deaneries = ref<DeaneryDto[]>([]);
 const parishes = ref<ParishDto[]>([]);
 const federations = ref<FederationDto[]>([]);
+const teams = ref<TeamDto[]>([]);
 const religions = ref<ReligionDto[]>([]);
 const majors = ref<MajorDto[]>([]);
 const responsibilities = ref<ResponsibilityDto[]>([]);
@@ -365,13 +373,19 @@ watch(currentMajorId, async (newMajorId) => {
 const onDeaneryChange = async () => {
     form.value.parishId = null;
     form.value.federationId = null;
+    form.value.teamId = 0;
     parishes.value = [];
     federations.value = [];
+    teams.value = [];
     
     if (form.value.deaneryId) {
         try {
-            const res = await getParishesByDeaneryId(form.value.deaneryId);
-            parishes.value = res.data;
+            const [parishRes, teamRes] = await Promise.all([
+                getParishesByDeaneryId(form.value.deaneryId),
+                getTeamsByDeaneryId(form.value.deaneryId)
+            ]);
+            parishes.value = parishRes.data;
+            teams.value = teamRes.data;
         } catch (error) {
             showToast(error);
         }
