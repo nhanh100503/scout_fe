@@ -44,35 +44,119 @@
                     </div>
                 </div>
 
-                <!-- Journal Content -->
-                <div class="px-6 md:px-8 py-6 md:py-8">
-                    <!-- Main Content -->
-                    <div class="prose prose-lg max-w-none mb-8">
-                        <p class="text-gray-700 leading-relaxed whitespace-pre-wrap text-justify">
-                            {{ activity.note || 'Chưa có nội dung chi tiết.' }}
-                        </p>
-                    </div>
-
-                    <!-- Image Gallery Placeholder (Future Enhancement) -->
-                    <div class="mb-8 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p class="text-gray-500 text-sm">Khu vực ảnh (Sắp ra mắt)</p>
-                    </div>
-
-                    <!-- Attendance Stats (if available and user can see) -->
-                    <div v-if="canAccessAttendance && activity.attendances && activity.attendances.length > 0" class="mb-8 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-                        <h3 class="text-lg font-semibold text-emerald-800 mb-2 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <!-- Activity Logs (Journal) Section -->
+                <div class="px-6 md:px-8 py-6 bg-white border-t border-gray-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
-                            Thống kê tham dự
+                            Nhật ký hoạt động
                         </h3>
-                        <p class="text-emerald-700">
-                            <span class="font-bold text-2xl">{{ activity.attendances.filter(a => a.present).length }}</span>
-                            <span class="text-sm">/ {{ activity.attendances.length }} thành viên đã tham dự</span>
-                        </p>
+                        <button v-if="canModifyActivity" @click="openLogForm" class="px-3 py-1.5 bg-emerald-600 text-white rounded-md text-sm hover:bg-emerald-700 flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Viết nhật ký
+                        </button>
+                    </div>
+
+                    <!-- Log Form Modal/Inline -->
+                    <div v-if="showLogForm" class="mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-inner">
+                        <h4 class="font-semibold text-gray-700 mb-3">{{ isEditingLog ? 'Chỉnh sửa nhật ký' : 'Nhật ký mới' }}</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tiêu đề (Tùy chọn)</label>
+                                <input v-model="logForm.title" type="text" class="w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500" placeholder="Tiêu đề nhật ký...">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nội dung</label>
+                                <div class="bg-white">
+                                    <QuillEditor theme="snow" v-model:content="logForm.content" contentType="html" :toolbar="quillOptions.modules.toolbar" placeholder="Nội dung..." />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Hình ảnh đính kèm</label>
+                                <input type="file" ref="logImageInput" multiple accept="image/*" @change="handleLogImageUpload" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"/>
+                                
+                                <!-- Existing Images (Edit Mode) -->
+                                <div v-if="logForm.existingImages.length > 0" class="mt-2 flex flex-wrap gap-2">
+                                    <div v-for="img in logForm.existingImages" :key="img.imageId" class="relative w-20 h-20 group">
+                                        <img :src="img.imageUrl" class="w-full h-full object-cover rounded-md border border-gray-200">
+                                        <button @click="removeExistingImage(img.imageId)" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- New Images Preview -->
+                                <div v-if="logImagesPreview.length > 0" class="mt-2 flex flex-wrap gap-2">
+                                    <div v-for="(preview, idx) in logImagesPreview" :key="idx" class="relative w-20 h-20 group">
+                                        <img :src="preview" class="w-full h-full object-cover rounded-md border border-gray-200">
+                                        <button @click="removePreviewImage(idx)" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-end gap-2 pt-2">
+                                <button @click="cancelLogForm" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Hủy</button>
+                                <button @click="submitLogForm" :disabled="isSubmitting" class="px-4 py-2 bg-emerald-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+                                    {{ isSubmitting ? 'Đang lưu...' : 'Lưu nhật ký' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logs List -->
+                    <div class="space-y-8">
+                        <div v-if="activityLogs.length === 0" class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                            <p class="text-gray-500">Chưa có nhật ký nào.</p>
+                        </div>
+                        
+                        <article v-for="log in activityLogs" :key="log.logId" class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                            <!-- Log Header -->
+                            <div class="p-4 bg-gray-50 flex items-center justify-between border-b border-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                                        <span class="text-emerald-700 font-bold text-xs">{{ log.author?.name?.charAt(0).toUpperCase() || '?' }}</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">{{ log.author?.name }}</p>
+                                        <p class="text-xs text-gray-500">{{ formatDate(log.createdAt) }}</p>
+                                    </div>
+                                </div>
+                                <div v-if="canModifyActivity" class="flex gap-2">
+                                    <button @click="editLog(log)" class="text-gray-400 hover:text-blue-600 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button @click="removeLog(log.logId)" class="text-gray-400 hover:text-red-600 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Log Content -->
+                            <div class="p-6">
+                                <h4 v-if="log.title" class="text-xl font-bold text-gray-900 mb-3">{{ log.title }}</h4>
+                                <div class="prose prose-sm max-w-none text-gray-700 mb-4" v-html="log.content"></div>
+                                
+                                <!-- Images Grid -->
+                                <div v-if="log.images && log.images.length > 0" class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-4">
+                                    <div v-for="img in log.images" :key="img.imageId" class="aspect-w-16 aspect-h-9 bg-gray-100 rounded-lg overflow-hidden cursor-pointer">
+                                        <img :src="img.imageUrl" class="object-cover w-full h-full hover:scale-105 transition-transform duration-300">
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
                     </div>
                 </div>
 
@@ -241,20 +325,52 @@ import { useAuth } from "@/composables/useAuth";
 import type { ActivityDto } from "@/types/activity.type";
 import type { CommentDto } from "@/types/comment.type";
 import { getActivityById } from "@/services/activityService";
+import { createActivityLog, getActivityLogsByActivity, updateActivityLog, deleteActivityLog, deleteActivityImage } from "@/services/activityLogService";
 import { createComment, deleteComment } from "@/services/commentService";
 import { formatDate } from "@/utils/dateFormat";
+import { QuillEditor } from '@vueup/vue-quill';
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
 const { showToast } = useToast();
 const { canModifyActivity, canAccessAttendance, currentMember } = useAuth();
 const route = useRoute();
 
 const activity = ref<ActivityDto | null>(null);
+const activityLogs = ref<any[]>([]); // Should be ActivityLogDto[]
 const comments = ref<CommentDto[]>([]);
 const newComment = ref("");
 const replyContent = ref("");
 const replyingTo = ref<number | null>(null);
 const isSubmitting = ref(false);
 const activityId = Number(route.params.activityId);
+
+// Activity Log State
+const showLogForm = ref(false);
+const isEditingLog = ref(false);
+const currentLogId = ref<number | null>(null);
+const logForm = ref({
+    title: "",
+    content: "",
+    images: [] as File[],
+    existingImages: [] as any[]
+});
+const logImagesPreview = ref<string[]>([]);
+const quillOptions = {
+    modules: {
+        toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'align': [] }],
+            // remove 'image' so uploads are handled by the file input below
+            ['link'],
+            ['clean']
+        ]
+    },
+    placeholder: 'Viết nội dung nhật ký...',
+    theme: 'snow'
+};
 
 /**
  * Format comment date to relative time or absolute date
@@ -382,7 +498,141 @@ const loadActivity = async () => {
     }
 };
 
+
+
+/**
+ * Activity Log Methods
+ */
+const loadActivityLogs = async () => {
+    try {
+        const res = await getActivityLogsByActivity(activityId);
+        if (res.code === 200) {
+            activityLogs.value = res.data;
+        }
+    } catch (error) {
+        console.error("Failed to load logs", error);
+    }
+};
+
+const openLogForm = () => {
+    showLogForm.value = true;
+    isEditingLog.value = false;
+    currentLogId.value = null;
+    logForm.value = { title: "", content: "", images: [], existingImages: [] };
+    logImagesPreview.value = [];
+};
+
+const editLog = (log: any) => {
+    showLogForm.value = true;
+    isEditingLog.value = true;
+    currentLogId.value = log.logId;
+    logForm.value = {
+        title: log.title || "",
+        content: log.content,
+        images: [],
+        existingImages: log.images || []
+    };
+    logImagesPreview.value = [];
+};
+
+const cancelLogForm = () => {
+    showLogForm.value = false;
+    logForm.value = { title: "", content: "", images: [], existingImages: [] };
+    logImagesPreview.value = [];
+};
+
+const handleLogImageUpload = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+        const files = Array.from(input.files);
+        logForm.value.images = [...logForm.value.images, ...files];
+        
+        // Create previews
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (e.target?.result) {
+                    logImagesPreview.value.push(e.target.result as string);
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+};
+
+const removePreviewImage = (index: number) => {
+    logForm.value.images.splice(index, 1);
+    logImagesPreview.value.splice(index, 1);
+};
+
+const removeExistingImage = async (imageId: number) => {
+    if(!confirm("Xóa ảnh này?")) return;
+    try {
+        await deleteActivityImage(imageId);
+        logForm.value.existingImages = logForm.value.existingImages.filter(img => img.imageId !== imageId);
+        console.log("Removed existing image:", logForm.value.existingImages);
+        // Also refresh logs in background
+        await loadActivityLogs();
+        showToast("Đã xóa ảnh", "success");
+    } catch (error: any) {
+        showToast("Lỗi xóa ảnh", "error");
+    }
+};
+
+const submitLogForm = async () => {
+    if (!logForm.value.content) {
+        showToast("Vui lòng nhập nội dung", "warning");
+        return;
+    }
+
+    const formData = new FormData();
+
+    // Only send activityId when creating new log, not when updating
+    if (!isEditingLog.value) {
+        formData.append("activityId", activityId.toString());
+    }
+
+    formData.append("title", logForm.value.title);
+    formData.append("content", logForm.value.content);
+    
+    logForm.value.images.forEach(file => {
+        formData.append("images", file);
+    });
+
+    isSubmitting.value = true;
+    try {
+        let res;
+        if (isEditingLog.value && currentLogId.value) {
+            res = await updateActivityLog(currentLogId.value, formData);
+        } else {
+            res = await createActivityLog(formData);
+        }
+
+        if (res.code === 200 || res.code === 201) {
+            showToast(isEditingLog.value ? "Đã cập nhật nhật ký" : "Đã thêm nhật ký", "success");
+            cancelLogForm();
+            await loadActivityLogs();
+        }
+    } catch (error: any) {
+        showToast(error.message || "Lỗi lưu nhật ký", "error");
+    } finally {
+        isSubmitting.value = false;
+    }
+};
+
+const removeLog = async (logId: number) => {
+    if(!confirm("Bạn chắc chắn muốn xóa nhật ký này?")) return;
+    try {
+        await deleteActivityLog(logId);
+        showToast("Đã xóa nhật ký", "success");
+        await loadActivityLogs();
+    } catch (error: any) {
+        showToast("Lỗi xóa nhật ký", "error");
+    }
+};
+
 onMounted(async () => {
     await loadActivity();
+    await loadActivityLogs();
 });
 </script>

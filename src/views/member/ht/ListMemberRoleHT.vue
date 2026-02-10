@@ -79,14 +79,6 @@
                                 </td>
                                 <td class="px-3 md:px-4 py-2 text-xs md:text-sm">
                                     <div class="flex flex-wrap gap-2">
-                                        <button @click="openAssignRank(member.memberId)"
-                                            class="px-2.5 md:px-3 py-1 bg-emerald-500 text-white rounded hover:bg-emerald-600 text-xs md:text-sm">
-                                            Cập nhật đẳng thứ
-                                        </button>
-                                        <button @click="openRankHistory(member)"
-                                            class="px-2.5 md:px-3 py-1 bg-teal-500 text-white rounded hover:bg-teal-600 text-xs md:text-sm">
-                                            Lịch sử cập nhật đẳng thứ
-                                        </button>
                                         <router-link :to="`/members/detail/ht/${member.memberId}`"
                                             class="px-2.5 md:px-3 py-1 bg-indigo-500 text-white rounded hover:bg-indigo-600 text-xs md:text-sm">
                                             Xem
