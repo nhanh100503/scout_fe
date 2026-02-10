@@ -13,6 +13,11 @@ export async function getTeamsByParishId(parishId: number): Promise<ApiResponse<
     return res.data;
 }
 
+export async function getTeamsByDeaneryId(deaneryId: number): Promise<ApiResponse<TeamDto[]>> {
+    const res: AxiosResponse<ApiResponse<TeamDto[]>> = await apiClient.get("/teams", { params: { deaneryId } });
+    return res.data;
+}
+
 export async function getTeamById(teamId: number): Promise<ApiResponse<TeamDto>> {
     const res: AxiosResponse<ApiResponse<TeamDto>> = await apiClient.get(`/teams/${teamId}`);
     return res.data;

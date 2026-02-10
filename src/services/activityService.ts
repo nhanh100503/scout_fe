@@ -33,3 +33,8 @@ export async function getAllActivitiesByDeaneryId(deaneryId: number, status: boo
     const res: AxiosResponse<ApiResponse<ActivityDto[]>> = await apiClient.get(`/activities/deanery/${deaneryId}/${status}`);
     return res.data;
 }
+
+export async function getActivitiesByTeamId(teamId: number, status: boolean): Promise<ApiResponse<ActivityDto[]>> {
+    const res: AxiosResponse<ApiResponse<ActivityDto[]>> = await apiClient.get(`/activities/team/${teamId}/${status}`);
+    return res.data;
+}

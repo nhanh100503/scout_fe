@@ -3,7 +3,8 @@
         <div class="max-w-4xl mx-auto w-full p-6">
             <h2 class="text-xl font-semibold mb-6 text-emerald-700">Cập nhật đội/nhóm</h2>
             
-            <form v-if="team" class="bg-white rounded-lg shadow p-6 space-y-6" @submit.prevent="handleSubmit">
+            <template v-if="team">
+            <form class="bg-white rounded-lg shadow p-6 space-y-6" @submit.prevent="handleSubmit">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Tên đội/nhóm <span class="text-red-500">*</span></label>
@@ -51,7 +52,7 @@
             </form>
 
             <!-- Team Leaders Management Section -->
-            <div v-if="team && hasAnyRole(['ADMIN', 'DT', 'HT'])" class="mt-6 bg-white rounded-lg shadow p-6">
+            <div v-if="hasAnyRole(['ADMIN', 'DT', 'HT'])" class="mt-6 bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-semibold mb-4 text-emerald-700">Quản lý Huynh trưởng</h3>
 
                 <!-- Current Leaders List -->
@@ -106,6 +107,7 @@
                     </div>
                 </div>
             </div>
+            </template>
 
             <div v-else-if="!loading" class="bg-red-50 p-4 rounded text-red-700 border border-red-200">
                 Không tìm thấy thông tin đội/nhóm hoặc bạn không có quyền truy cập.
