@@ -30,6 +30,17 @@
                         </select>
                         <p v-if="errors.parishId" class="mt-1 text-xs text-red-500">{{ errors.parishId }}</p>
                     </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Ngành <span class="text-red-500">*</span></label>
+                        <select v-model="form.majorId" :class="inputClass(errors.majorId)">
+                            <option :value="undefined" disabled>-- Chọn ngành --</option>
+                            <option v-for="item in majors" :key="item.majorId" :value="item.majorId">
+                                {{ item.name }}
+                            </option>
+                        </select>
+                        <p v-if="errors.majorId" class="mt-1 text-xs text-red-500">{{ errors.majorId }}</p>
+                    </div>
                 </div>
 
                 <div class="flex justify-end gap-4 pt-4 border-t">
@@ -53,9 +64,11 @@ import { inputClass } from "@/utils/inputClass";
 import { getAllDeanery } from "@/services/deaneryService";
 import { getParishesByDeaneryId } from "@/services/parishService";
 import { createTeam } from "@/services/teamService";
+import { getAllMajor } from "@/services/majorService"; 
 import { TeamCreateRequest } from "@/types/team.type";
 import { DeaneryDto } from "@/types/deanery.type";
 import { ParishDto } from "@/types/parish.type";
+import { MajorDto } from "@/types/major.type";
 
 const router = useRouter();
 const { showToast } = useToast();
@@ -65,18 +78,23 @@ const errors = ref<any>({});
 const deaneryId = ref<number | null>(null);
 const deaneries = ref<DeaneryDto[]>([]);
 const parishes = ref<ParishDto[]>([]);
+const majors = ref<MajorDto[]>([]);
 
 const form = ref<TeamCreateRequest>({
     name: "",
-    parishId: 0
+    parishId: 0,
+    majorId: undefined
 });
 
 onMounted(async () => {
     try {
         const res = await getAllDeanery();
         deaneries.value = res.data;
+        
+        const resMajors = await getAllMajor();
+        majors.value = resMajors.data;
     } catch (e) {
-        showToast("Không thể tải danh sách châu", "error");
+        showToast("Không thể tải dữ liệu", "error");
     }
 });
 
@@ -97,6 +115,7 @@ async function handleSubmit() {
     errors.value = {};
     if (!form.value.name) errors.value.name = "Tên đội/nhóm không được để trống";
     if (!form.value.parishId) errors.value.parishId = "Vui lòng chọn đạo";
+    if (!form.value.majorId) errors.value.majorId = "Vui lòng chọn ngành";
 
     if (Object.keys(errors.value).length > 0) return;
 

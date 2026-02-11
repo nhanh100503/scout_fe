@@ -13,8 +13,18 @@ export async function getTeamsByParishId(parishId: number): Promise<ApiResponse<
     return res.data;
 }
 
+export async function getTeamsByParishIdAndMajorId(parishId: number, majorId: number): Promise<ApiResponse<TeamDto[]>> {
+    const res: AxiosResponse<ApiResponse<TeamDto[]>> = await apiClient.get("/teams", { params: { parishId, majorId } });
+    return res.data;
+}
+
 export async function getTeamsByDeaneryId(deaneryId: number): Promise<ApiResponse<TeamDto[]>> {
     const res: AxiosResponse<ApiResponse<TeamDto[]>> = await apiClient.get("/teams", { params: { deaneryId } });
+    return res.data;
+}
+
+export async function getTeamsByDeaneryIdAndMajorId(deaneryId: number, majorId: number): Promise<ApiResponse<TeamDto[]>> {
+    const res: AxiosResponse<ApiResponse<TeamDto[]>> = await apiClient.get("/teams", { params: { deaneryId, majorId } });
     return res.data;
 }
 

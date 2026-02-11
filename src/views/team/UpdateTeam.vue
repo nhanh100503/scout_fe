@@ -26,18 +26,35 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Đạo (Giáo xứ) <span class="text-red-500">*</span></label>
                             <select v-model="form.parishId" :class="inputClass(errors.parishId)">
-                                <option :value="null" disabled>-- Chọn đạo --</option>
+                                <option :value="undefined" disabled>-- Chọn đạo --</option>
                                 <option v-for="item in parishes" :key="item.parishId" :value="item.parishId">
                                     {{ item.name }}
                                 </option>
                             </select>
                             <p v-if="errors.parishId" class="mt-1 text-xs text-red-500">{{ errors.parishId }}</p>
                         </div>
+
+                         <div>
+                            <label class="block text-sm font-medium text-gray-700">Ngành <span class="text-red-500">*</span></label>
+                            <select v-model="form.majorId" :class="inputClass(errors.majorId)">
+                                <option :value="undefined" disabled>-- Chọn ngành --</option>
+                                <option v-for="item in majors" :key="item.majorId" :value="item.majorId">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                            <p v-if="errors.majorId" class="mt-1 text-xs text-red-500">{{ errors.majorId }}</p>
+                        </div>
                     </template>
                     <div v-else>
-                        <label class="block text-sm font-medium text-gray-700">Giáo xứ</label>
-                        <div class="mt-2 text-sm text-gray-600 font-medium">{{ team.parish?.name }}</div>
-                        <p class="mt-1 text-xs text-gray-400 italic">(Chỉ quản trị viên mới có thể thay đổi giáo xứ)</p>
+                        <div>
+                             <label class="block text-sm font-medium text-gray-700">Giáo xứ</label>
+                             <div class="mt-2 text-sm text-gray-600 font-medium">{{ team.parish?.name }}</div>
+                        </div>
+                        <div class="mt-4">
+                             <label class="block text-sm font-medium text-gray-700">Ngành</label>
+                             <div class="mt-2 text-sm text-gray-600 font-medium">{{ team.major?.name || 'Chưa phân ngành' }}</div>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-400 italic">(Chỉ quản trị viên mới có thể thay đổi thông tin này)</p>
                     </div>
                 </div>
 
@@ -50,11 +67,11 @@
                     </button>
                 </div>
             </form>
-
-            <!-- Team Leaders Management Section -->
-            <div v-if="hasAnyRole(['ADMIN', 'DT', 'HT'])" class="mt-6 bg-white rounded-lg shadow p-6">
+            
+            <!-- (keep team leaders section) -->
+             <div v-if="hasAnyRole(['ADMIN', 'DT', 'HT'])" class="mt-6 bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-semibold mb-4 text-emerald-700">Quản lý Huynh trưởng</h3>
-
+                <!-- ... content ... -->
                 <!-- Current Leaders List -->
                 <div class="mb-4">
                     <h4 class="text-sm font-medium text-gray-700 mb-2">Danh sách Huynh trưởng hiện tại:</h4>
@@ -126,10 +143,12 @@ import { getTeamById, updateTeam } from "@/services/teamService";
 import { assignLeaderToTeam, removeLeaderFromTeam } from "@/services/teamLeaderService";
 import { getAllDeanery } from "@/services/deaneryService";
 import { getParishesByDeaneryId } from "@/services/parishService";
+import { getAllMajor } from "@/services/majorService";
 import { getAllMembers } from "@/services/memberService";
 import { TeamUpdateRequest } from "@/types/team.type";
 import { DeaneryDto } from "@/types/deanery.type";
 import { ParishDto } from "@/types/parish.type";
+import { MajorDto } from "@/types/major.type";
 
 const route = useRoute();
 const router = useRouter();
@@ -144,10 +163,12 @@ const team = ref<any>(null);
 const deaneryId = ref<number | null>(null);
 const deaneries = ref<DeaneryDto[]>([]);
 const parishes = ref<ParishDto[]>([]);
+const majors = ref<MajorDto[]>([]);
 
 const form = ref<TeamUpdateRequest>({
     name: "",
-    parishId: undefined
+    parishId: undefined,
+    majorId: undefined
 });
 
 // Team Leader Management
@@ -172,10 +193,14 @@ onMounted(async () => {
             team.value = res.data;
             form.value.name = res.data.name;
             form.value.parishId = res.data.parishId;
+            form.value.majorId = res.data.majorId;
 
             if (hasAnyRole(['ADMIN'])) {
                 const resDeaneries = await getAllDeanery();
                 deaneries.value = resDeaneries.data;
+                
+                const resMajors = await getAllMajor();
+                majors.value = resMajors.data;
                 
                 // Set initial deanery and load parishes
                 if (res.data.parish?.deaneryId) {

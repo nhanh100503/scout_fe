@@ -269,7 +269,7 @@ import { ParishDto } from "@/types/parish.type";
 import { getParishesByDeaneryId } from "@/services/parishService";
 import { FederationDto } from "@/types/federation.type";
 import { getFederationsByParishId } from "@/services/federationService";
-import { getTeamsByParishId } from "@/services/teamService";
+import { getTeamsByParishIdAndMajorId } from "@/services/teamService";
 import { TeamDto } from "@/types/team.type";
 import { ApiResponse } from "@/types/api.type";
 import router from "@/routers";
@@ -363,15 +363,29 @@ watch(currentMajorId, async (newMajorId) => {
                 now: true
             });
         }
+        
         try {
             const res = await getAllResponsibilitiesDTByMajorId(Number(newMajorId));
             responsibilities.value = res.data;
         } catch (error) {
             responsibilities.value = [];
         }
+
+        // Fetch teams if parish is selected
+        if (form.value.parishId) {
+             try {
+                const res = await getTeamsByParishIdAndMajorId(form.value.parishId, Number(newMajorId));
+                teams.value = res.data;
+            } catch (error) {
+                teams.value = [];
+            }
+        }
+
     } else {
         responsibilities.value = [];
+        teams.value = [];
         form.value.responsibilityId = null;
+        form.value.teamId = 0;
     }
 });
 
@@ -403,8 +417,11 @@ const onParishChange = async () => {
         try {
             const res = await getFederationsByParishId(form.value.parishId);
             federations.value = res.data;
-            const resTeams = await getTeamsByParishId(form.value.parishId);
-            teams.value = resTeams.data;
+            
+             if (currentMajorId.value) {
+                 const resTeams = await getTeamsByParishIdAndMajorId(form.value.parishId, Number(currentMajorId.value));
+                 teams.value = resTeams.data;
+             }
         } catch (error) {
             showToast(error);
         }
