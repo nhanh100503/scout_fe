@@ -5,7 +5,7 @@
             <form class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
                 <div class="flex-1 overflow-y-auto space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
+                        <div v-if="canSelectDeanery">
                             <label class="block text-sm font-medium text-gray-700">
                                 Châu <span class="text-red-500">*</span>
                             </label>
@@ -155,7 +155,7 @@ const errors = ref<ValidationErrorActivity>({});
 const deaneries = ref<DeaneryDto[]>([]);
 const teams = ref<TeamDto[]>([]);
 const { showToast } = useToast();
-const { canModifyActivity } = useAuth();
+const { canModifyActivity, canSelectDeanery, currentMember } = useAuth();
 
 // Initialize 10 empty plan rows
 const planRows = ref<PlanRowInput[]>(
@@ -169,35 +169,57 @@ const planRows = ref<PlanRowInput[]>(
     }))
 );
 
+async function initializeView() {
+     if (canSelectDeanery.value) {
+        if(deaneries.value.length > 0) return;
+        try {
+            const res: ApiResponse<DeaneryDto[]> = await getAllDeanery();
+            if (res.code === 200) {
+                deaneries.value = res.data;
+            }
+        } catch (err: any) {
+            showToast("Không tải được danh sách châu", "error");
+        }
+    } else {
+        if (currentMember.value?.deaneryId) {
+            form.value.deaneryId = currentMember.value.deaneryId;
+            // Fetch teams for the auto-selected deanery
+            await fetchTeamsForDeanery(Number(form.value.deaneryId));
+        }
+    }
+}
+
 onMounted(async () => {
     if (!canModifyActivity.value) {
         showToast("Bạn không có quyền tạo sinh hoạt. Vai trò Đoàn Sinh chỉ có quyền xem và bình luận.", "error");
         router.push("/activities");
         return;
     }
-
-    try {
-        const res: ApiResponse<DeaneryDto[]> = await getAllDeanery();
-        if (res.code === 200) {
-            deaneries.value = res.data;
-        }
-    } catch (err: any) {
-        showToast("Không tải được danh sách châu", "error");
-    }
+    initializeView();
 });
+
+watch(currentMember, (newVal) => {
+    if(newVal) {
+        initializeView();
+    }
+})
+
+async function fetchTeamsForDeanery(deaneryId: number) {
+    try {
+        const res = await getTeamsByDeaneryId(deaneryId);
+        if (res.code === 200) {
+            teams.value = res.data;
+        }
+    } catch (e) {
+        console.error("Không tải được danh sách đội/nhóm", e);
+    }
+}
 
 async function onDeaneryChange() {
     form.value.teamId = null;
     teams.value = [];
     if (form.value.deaneryId) {
-        try {
-            const res = await getTeamsByDeaneryId(form.value.deaneryId);
-            if (res.code === 200) {
-                teams.value = res.data;
-            }
-        } catch (e) {
-            console.error("Không tải được danh sách đội/nhóm", e);
-        }
+        await fetchTeamsForDeanery(form.value.deaneryId);
     }
 }
 
