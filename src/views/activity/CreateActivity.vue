@@ -201,7 +201,7 @@ import type { TeamDto } from "@/types/team.type";
 
 const activityTypeOptions = [
     { value: 'DEANERY' as ActivityType, label: 'Cấp Châu', icon: '🏛️' },
-    { value: 'PARISH' as ActivityType, label: 'Cấp Xứ', icon: '⛪' },
+    { value: 'PARISH' as ActivityType, label: 'Cấp Đạo', icon: '⛪' },
     { value: 'MAJOR' as ActivityType, label: 'Cấp Ngành', icon: '🎯' },
     { value: 'TEAM' as ActivityType, label: 'Cấp Đội', icon: '👥' },
 ];

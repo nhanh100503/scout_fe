@@ -88,3 +88,13 @@ export async function uploadAvatar(memberId: number, file: File): Promise<ApiRes
     );
     return res.data;
 }
+
+export async function getAllLeaders(): Promise<ApiResponse<MemberDto[]>> {
+    const res: AxiosResponse<ApiResponse<MemberDto[]>> = await apiClient.get("/members/leaders/all");
+    return res.data;
+}
+
+export async function updateMemberTeam(memberId: number, teamId: number | null): Promise<ApiResponse<MemberDto>> {
+    const res: AxiosResponse<ApiResponse<MemberDto>> = await apiClient.patch(`/members/${memberId}/team`, { teamId });
+    return res.data;
+}
