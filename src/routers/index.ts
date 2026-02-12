@@ -97,6 +97,10 @@ const routes = [
             { path: '/federations/detail/:federationId', name: 'detailFederation', component: () => import('@/views/federation/DetailFederation.vue') },
             { path: '/federations/update/:federationId', name: 'updateFederation', component: () => import('@/views/federation/UpdateFederation.vue') },
 
+            { path: ROUTER_PATHS.LIST_TEAM, name: 'listTeam', component: () => import('@/views/team/ListTeam.vue') },
+            { path: ROUTER_PATHS.ADD_TEAM, name: 'addTeam', component: () => import('@/views/team/CreateTeam.vue') },
+            { path: ROUTER_PATHS.UPDATE_TEAM, name: 'updateTeam', component: () => import('@/views/team/UpdateTeam.vue') },
+
             { path: ROUTER_PATHS.LIST_RELIGION, name: 'listReligion', component: ListReligion },
             { path: ROUTER_PATHS.ADD_RELIGION, name: 'createReligion', component: CreateReligion },
             { path: ROUTER_PATHS.DETAIL_RELIGION, name: 'detailReligion', component: DetailReligion },

@@ -23,37 +23,50 @@
                 </div>
             </div>
             <form @submit.prevent="handleSubmit" class="space-y-4">
-                <div class="overflow-x-auto bg-white rounded-lg shadow">
-                    <table class="min-w-full border-collapse">
-                        <thead class="bg-gray-100">
-                            <tr class="border-b border-gray-200">
-                                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">STT</th>
-                                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Tên thành viên</th>
-                                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Ngày sinh</th>
-                                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Vai trò</th>
-                                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Tham gia</th>
-                                <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Ghi chú</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(member, index) in members" :key="member.memberId"
-                                class="border-t border-gray-200 hover:bg-gray-50">
-                                <td class="px-3 py-2 text-sm">{{ index + 1 }}</td>
-                                <td class="px-3 py-2 text-sm">{{ member.name }}</td>
-                                <td class="px-3 py-2 text-sm">{{ formatDate(member.birthday) }}</td>
-                                <td class="px-3 py-2 text-sm">{{ member.roles?.map(r => r.name).join(", ") || "N/A" }}</td>
-                                <td class="px-3 py-2 text-sm">
-                                    <input type="checkbox" v-model="attendanceForm[index].present" />
-                                </td>
-                                <td class="px-3 py-2 text-sm">
-                                    <input type="text" v-model="attendanceForm[index].note"
-                                        class="w-full border rounded px-2 py-1 text-sm" placeholder="Ghi chú..." />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- Team-grouped attendance -->
+                <div v-for="teamGroup in teamGroups" :key="teamGroup.teamId" class="mb-6">
+                    <div class="bg-emerald-50 px-4 py-2 rounded-t-lg border border-emerald-200">
+                        <h3 class="text-sm font-semibold text-emerald-800">
+                            🏷️ {{ teamGroup.teamName }}
+                            <span v-if="teamGroup.parishName" class="text-xs text-emerald-600 ml-2">({{ teamGroup.parishName }})</span>
+                            <span class="text-xs text-gray-500 ml-2">— {{ teamGroup.members.length }} thành viên</span>
+                        </h3>
+                    </div>
+                    <div class="overflow-x-auto bg-white rounded-b-lg shadow border border-t-0 border-gray-200">
+                        <table class="min-w-full border-collapse">
+                            <thead class="bg-gray-100">
+                                <tr class="border-b border-gray-200">
+                                    <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">STT</th>
+                                    <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Tên thành viên</th>
+                                    <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Ngày sinh</th>
+                                    <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Tham gia</th>
+                                    <th class="px-3 py-2 text-left text-sm font-medium text-gray-700">Ghi chú</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(member, index) in teamGroup.members" :key="member.memberId"
+                                    class="border-t border-gray-200 hover:bg-gray-50">
+                                    <td class="px-3 py-2 text-sm">{{ index + 1 }}</td>
+                                    <td class="px-3 py-2 text-sm">{{ member.name }}</td>
+                                    <td class="px-3 py-2 text-sm">{{ formatDate(member.birthday) }}</td>
+                                    <td class="px-3 py-2 text-sm">
+                                        <input type="checkbox" v-model="attendanceMap[member.memberId].present" />
+                                    </td>
+                                    <td class="px-3 py-2 text-sm">
+                                        <input type="text" v-model="attendanceMap[member.memberId].note"
+                                            class="w-full border rounded px-2 py-1 text-sm" placeholder="Ghi chú..." />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="flex justify-end gap-3 mt-6">
+
+                <div v-if="teamGroups.length === 0 && !loading" class="text-center text-gray-500 py-8">
+                    Không tìm thấy đội/nhóm nào để điểm danh.
+                </div>
+
+                <div v-if="teamGroups.length > 0" class="flex justify-end gap-3 mt-6">
                     <router-link to="/activities" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm">
                         Quay lại
                     </router-link>
@@ -68,75 +81,98 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useToast } from "@/composables/useToast";
+import { useAuth } from "@/composables/useAuth";
 import type { ApiResponse } from "@/types/api.type";
 import type { ActivityDto } from "@/types/activity.type";
-import type { MemberDto } from "@/types/member.type";
 import { getActivityById } from "@/services/activityService";
-import { getAllMembersByDeaneryId } from "@/services/memberService";
-import { createAttendance } from "@/services/attendanceService";
+import { createAttendance, getAttendanceByActivity, getMembersForMyTeamAttendance, getAllTeamsForActivity } from "@/services/attendanceService";
 import type { AttendanceCreateRequest, AttendanceDto, MemberAttendanceRequest } from "@/types/attendance.type";
 import { formatDate } from "@/utils/dateFormat";
 
 const { showToast } = useToast();
+const { hasAnyRole } = useAuth();
 const route = useRoute();
 const router = useRouter();
 
 const activity = ref<ActivityDto | null>(null);
-const members = ref<MemberDto[]>([]);
-const attendanceForm = ref<MemberAttendanceRequest[]>([]);
-
+const loading = ref(false);
 const activityId = Number(route.params.activityId);
 
-import { getAttendanceByActivity } from "@/services/attendanceService";
+interface TeamGroup {
+    teamId: number;
+    teamName: string;
+    parishName?: string;
+    members: any[];
+}
+
+const teamGroups = ref<TeamGroup[]>([]);
+const attendanceMap = reactive<Record<number, MemberAttendanceRequest>>({});
 
 onMounted(async () => {
+    loading.value = true;
     try {
+        // 1. Load activity info
         const resAct: ApiResponse<ActivityDto> = await getActivityById(activityId);
-        console.log("Activity Response:", resAct);
         if (resAct.code === 200 && resAct.data) {
             activity.value = resAct.data;
-            const deaneryId = resAct.data.deanery.deaneryId || resAct.data.createdBy?.deanery?.deaneryId;
+        }
 
-            if (deaneryId) {
-                const resMem: ApiResponse<MemberDto[]> = await getAllMembersByDeaneryId(deaneryId);
-                console.log("Members Response:", resMem);
-                if (resMem.code === 200) {
-                    members.value = resMem.data; 
-                    attendanceForm.value = members.value.map(m => ({
-                        memberId: m.memberId,
-                        present: false,
-                        note: ""
-                    }));
-                    const resAtt: ApiResponse<AttendanceDto[]> = await getAttendanceByActivity(activityId);
-                    if (resAtt.code === 200 && resAtt.data) {
-                        resAtt.data.forEach(att => {
-                            const idx = attendanceForm.value.findIndex(f => f.memberId === att.member.memberId);
-                            if (idx !== -1) {
-                                attendanceForm.value[idx].present = att.present;
-                                attendanceForm.value[idx].note = att.note || "";
-                            }
-                        });
-                    }
-                }
-            } else {
-                console.warn("Không tìm thấy deaneryId trong dữ liệu hoạt động");
+        // 2. Load members grouped by team based on role
+        let groups: TeamGroup[] = [];
+        if (hasAnyRole(['ADMIN'])) {
+            // Admin sees all teams
+            const resTeams = await getAllTeamsForActivity(activityId);
+            if (resTeams.code === 200) {
+                groups = resTeams.data;
             }
+        } else {
+            // HT/DT only sees their own teams
+            const resTeams = await getMembersForMyTeamAttendance(activityId);
+            if (resTeams.code === 200) {
+                groups = resTeams.data;
+            }
+        }
+
+        teamGroups.value = groups;
+
+        // 3. Build attendance map for all members
+        groups.forEach(group => {
+            group.members.forEach(m => {
+                attendanceMap[m.memberId] = {
+                    memberId: m.memberId,
+                    present: false,
+                    note: ""
+                };
+            });
+        });
+
+        // 4. Load existing attendance and merge
+        const resAtt: ApiResponse<AttendanceDto[]> = await getAttendanceByActivity(activityId);
+        if (resAtt.code === 200 && resAtt.data) {
+            resAtt.data.forEach(att => {
+                if (attendanceMap[att.member.memberId]) {
+                    attendanceMap[att.member.memberId].present = att.present;
+                    attendanceMap[att.member.memberId].note = att.note || "";
+                }
+            });
         }
     } catch (error: any) {
         console.error("Lỗi khi load dữ liệu:", error);
-        showToast(error.message, "error");
+        showToast(error.message || "Không thể tải dữ liệu điểm danh", "error");
+    } finally {
+        loading.value = false;
     }
 });
 
-
 async function handleSubmit() {
     try {
+        const members: MemberAttendanceRequest[] = Object.values(attendanceMap);
         const payload: AttendanceCreateRequest = {
             activityId,
-            members: attendanceForm.value
+            members
         };
         const res = await createAttendance(payload);
         if (res.code === 200) {

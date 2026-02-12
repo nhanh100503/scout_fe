@@ -23,17 +23,31 @@
                 </div>
             </div>
         </div>
-        <div class="px-4 md:px-6 mb-4">
-            <label for="deanery" class="block text-sm font-medium text-gray-700 mb-2">
-                Chọn châu
-            </label>
-            <select id="deanery" v-model="selectedDeaneryId" @change="loadActivities"
-                class="w-full md:w-1/2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="" disabled>-- Chọn châu --</option>
-                <option v-for="deanery in deaneries" :key="deanery.deaneryId" :value="deanery.deaneryId">
-                    {{ deanery.name }}
-                </option>
-            </select>
+        <div class="px-4 md:px-6 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="deanery" class="block text-sm font-medium text-gray-700 mb-2">
+                    Chọn châu
+                </label>
+                <select id="deanery" v-model="selectedDeaneryId" @change="onDeaneryChange"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="" disabled>-- Chọn châu --</option>
+                    <option v-for="deanery in deaneries" :key="deanery.deaneryId" :value="deanery.deaneryId">
+                        {{ deanery.name }}
+                    </option>
+                </select>
+            </div>
+            <div>
+                <label for="team" class="block text-sm font-medium text-gray-700 mb-2">
+                    Lọc theo đội/nhóm
+                </label>
+                <select id="team" v-model="selectedTeamId" @change="loadActivities"
+                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option :value="null">-- Tất cả --</option>
+                    <option v-for="t in teams" :key="t.teamId" :value="t.teamId">
+                        {{ t.name }}
+                    </option>
+                </select>
+            </div>
         </div>
         <div class="px-4 md:px-6 mb-4 flex gap-4">
             <button @click="changeStatus(false)"
@@ -131,9 +145,11 @@ import { ref, onMounted } from "vue";
 import { useToast } from "@/composables/useToast";
 import { useAuth } from "@/composables/useAuth";
 import { getAllDeanery } from "@/services/deaneryService";
-import { deleteActivity, getAllActivitiesByDeaneryId, updateStatusActivity } from "@/services/activityService";
+import { deleteActivity, getAllActivitiesByDeaneryId, getActivitiesByTeamId, updateStatusActivity } from "@/services/activityService";
+import { getTeamsByDeaneryId } from "@/services/teamService";
 import type { DeaneryDto } from "@/types/deanery.type";
 import type { ActivityDto } from "@/types/activity.type";
+import type { TeamDto } from "@/types/team.type";
 import type { ApiResponse } from "@/types/api.type";
 import { formatDate } from "@/utils/dateFormat";
 
@@ -141,7 +157,9 @@ const { showToast } = useToast();
 const { canModifyActivity, canAccessAttendance } = useAuth();
 const deaneries = ref<DeaneryDto[]>([]);
 const activities = ref<ActivityDto[]>([]);
+const teams = ref<TeamDto[]>([]);
 const selectedDeaneryId = ref<number | "">("");
+const selectedTeamId = ref<number | null>(null);
 const activeStatus = ref<boolean | null>(null);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
@@ -162,13 +180,32 @@ function openConfirm(id: number) {
     showConfirm.value = true;
 }
 
+async function onDeaneryChange() {
+    selectedTeamId.value = null;
+    teams.value = [];
+    activities.value = [];
+    if (selectedDeaneryId.value) {
+        try {
+            const teamRes = await getTeamsByDeaneryId(Number(selectedDeaneryId.value));
+            if (teamRes.code === 200) {
+                teams.value = teamRes.data;
+            }
+        } catch (e) {
+            console.error("Không tải được danh sách đội", e);
+        }
+        loadActivities();
+    }
+}
+
 async function loadActivities() {
     if (!selectedDeaneryId.value || activeStatus.value === null) return;
     try {
-        const res: ApiResponse<ActivityDto[]> = await getAllActivitiesByDeaneryId(
-            Number(selectedDeaneryId.value),
-            activeStatus.value
-        );
+        let res: ApiResponse<ActivityDto[]>;
+        if (selectedTeamId.value) {
+            res = await getActivitiesByTeamId(selectedTeamId.value, activeStatus.value);
+        } else {
+            res = await getAllActivitiesByDeaneryId(Number(selectedDeaneryId.value), activeStatus.value);
+        }
         if (res.code === 200) {
             activities.value = res.data;
         }
