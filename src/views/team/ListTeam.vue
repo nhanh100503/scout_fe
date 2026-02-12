@@ -9,6 +9,10 @@
                 + Thêm đội/nhóm
             </router-link>
         </div>
+        <div class="px-4 md:px-6 mb-4">
+            <input v-model="searchQuery" type="text" placeholder="🔍 Tìm kiếm theo tên đội/nhóm, giáo xứ..."
+                class="w-full md:w-1/2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+        </div>
 
         <!-- Confirm Delete Modal -->
         <div v-if="showConfirm" class="fixed inset-0 flex items-center justify-center z-50 bg-black/20">
@@ -51,7 +55,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(team, index) in teams" :key="team.teamId"
+                            <tr v-for="(team, index) in filteredTeams" :key="team.teamId"
                                 class="border-t border-gray-200 hover:bg-gray-50">
                                 <td class="px-3 md:px-4 py-2 text-xs md:text-sm">
                                     {{ index + 1 }}
@@ -85,8 +89,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div v-if="teams.length === 0 && !loading" class="text-center text-gray-500 py-8">
-                    Không tìm thấy đội/nhóm nào.
+                <div v-if="filteredTeams.length === 0 && !loading" class="text-center text-gray-500 py-8">
+                    {{ searchQuery ? 'Không tìm thấy kết quả phù hợp.' : 'Không tìm thấy đội/nhóm nào.' }}
                 </div>
                 <div v-if="loading" class="text-center text-emerald-600 py-8">
                     Đang tải dữ liệu...
@@ -107,8 +111,18 @@ const teams = ref<any[]>([]);
 const loading = ref(false);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
+const searchQuery = ref("");
 const { showToast } = useToast();
 const { hasAnyRole } = useAuth();
+
+const filteredTeams = computed(() => {
+    if (!searchQuery.value.trim()) return teams.value;
+    const q = searchQuery.value.toLowerCase().trim();
+    return teams.value.filter(t =>
+        t.name?.toLowerCase().includes(q) ||
+        t.parish?.name?.toLowerCase().includes(q)
+    );
+});
 
 const canCreateDeleteTeam = computed(() => hasAnyRole(['ADMIN', 'DT', 'HT']));
 const canUpdateTeam = computed(() => hasAnyRole(['ADMIN', 'DT', 'HT']));
