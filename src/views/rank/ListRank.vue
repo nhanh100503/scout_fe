@@ -9,6 +9,10 @@
                 + Thêm đẳng thứ
             </router-link>
         </div>
+        <div class="px-4 md:px-6 mb-4">
+            <input v-model="searchQuery" type="text" placeholder="🔍 Tìm kiếm theo tên đẳng thứ..."
+                class="w-full md:w-1/2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+        </div>
         <div v-if="showConfirm" class="fixed inset-0 flex items-center justify-center z-50">
             <div class="bg-white rounded-lg shadow-lg p-6 w-120 border border-gray-300">
                 <h3 class="text-lg font-semibold mb-4">Xác nhận xóa</h3>
@@ -44,7 +48,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(rank, index) in ranks" :key="rank.rankId"
+                            <tr v-for="(rank, index) in filteredRanks" :key="rank.rankId"
                                 class="border-t border-gray-200 hover:bg-gray-50">
                                 <td class="px-3 md:px-4 py-2 text-xs md:text-sm">
                                     {{ index + 1 }}
@@ -75,8 +79,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div v-if="ranks.length === 0" class="text-center text-gray-500 py-4">
-                    Chưa có đẳng thứ nào.
+                <div v-if="filteredRanks.length === 0" class="text-center text-gray-500 py-4">
+                    {{ searchQuery ? 'Không tìm thấy kết quả phù hợp.' : 'Chưa có đẳng thứ nào.' }}
                 </div>
             </div>
         </div>
@@ -87,12 +91,19 @@
 import { useToast } from "@/composables/useToast";
 import { deleteRank, getAllRank } from "@/services/rankService";
 import { RankDto } from "@/types/rank.type";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 
 const { showToast } = useToast();
 const ranks = ref<RankDto[]>([]);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
+const searchQuery = ref("");
+
+const filteredRanks = computed(() => {
+    if (!searchQuery.value.trim()) return ranks.value;
+    const q = searchQuery.value.toLowerCase().trim();
+    return ranks.value.filter(r => r.name?.toLowerCase().includes(q));
+});
 
 async function loadRanks() {
     const res = await getAllRank();

@@ -24,7 +24,7 @@
             </div>
         </div>
         <div class="px-4 md:px-6 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div v-if="canSelectDeanery">
                 <label for="deanery" class="block text-sm font-medium text-gray-700 mb-2">
                     Chọn châu
                 </label>
@@ -36,7 +36,7 @@
                     </option>
                 </select>
             </div>
-            <div>
+            <div v-if="canSelectDeanery">
                 <label for="team" class="block text-sm font-medium text-gray-700 mb-2">
                     Lọc theo đội/nhóm
                 </label>
@@ -141,7 +141,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useToast } from "@/composables/useToast";
 import { useAuth } from "@/composables/useAuth";
 import { getAllDeanery } from "@/services/deaneryService";
@@ -154,7 +154,7 @@ import type { ApiResponse } from "@/types/api.type";
 import { formatDate } from "@/utils/dateFormat";
 
 const { showToast } = useToast();
-const { canModifyActivity, canAccessAttendance } = useAuth();
+const { canModifyActivity, canAccessAttendance, canSelectDeanery, isDSOnly, currentMember } = useAuth();
 const deaneries = ref<DeaneryDto[]>([]);
 const activities = ref<ActivityDto[]>([]);
 const teams = ref<TeamDto[]>([]);
@@ -164,14 +164,32 @@ const activeStatus = ref<boolean | null>(null);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
 
-onMounted(async () => {
-    try {
-        const res: ApiResponse<DeaneryDto[]> = await getAllDeanery();
-        if (res.code === 200) {
-            deaneries.value = res.data;
+async function initializeView() {
+    if (canSelectDeanery.value) {
+        if (deaneries.value.length > 0) return;
+        try {
+            const res: ApiResponse<DeaneryDto[]> = await getAllDeanery();
+            if (res.code === 200) {
+                deaneries.value = res.data;
+            }
+        } catch (error: any) {
+            showToast(error.message, "error");
         }
-    } catch (error: any) {
-        showToast(error.message, "error");
+    } else {
+        if (currentMember.value?.deaneryId && !selectedDeaneryId.value) {
+            selectedDeaneryId.value = currentMember.value.deaneryId;
+            await onDeaneryChange();
+        }
+    }
+}
+
+onMounted(() => {
+    initializeView();
+});
+
+watch(currentMember, (newVal) => {
+    if (newVal) {
+        initializeView();
     }
 });
 

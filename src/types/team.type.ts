@@ -17,7 +17,16 @@ export interface TeamDto {
     _count?: {
         members: number;
     };
+    members?: TeamMemberDto[];
     teamLeaders?: TeamLeaderDto[];
+}
+
+export interface TeamMemberDto {
+    memberId: number;
+    name: string;
+    email: string;
+    phone?: string;
+    avatar?: string;
 }
 
 export interface TeamLeaderDto {

@@ -9,6 +9,10 @@
                 + Thêm đạo
             </router-link>
         </div>
+        <div class="px-4 md:px-6 mb-4">
+            <input v-model="searchQuery" type="text" placeholder="🔍 Tìm kiếm theo tên đạo, châu..."
+                class="w-full md:w-1/2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+        </div>
         <div v-if="showConfirm" class="fixed inset-0 flex items-center justify-center z-50">
             <div class="bg-white rounded-lg shadow-lg p-6 w-120 border border-gray-300">
                 <h3 class="text-lg font-semibold mb-4">Xác nhận xóa</h3>
@@ -44,7 +48,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(parish, index) in parishes" :key="parish.parishId"
+                            <tr v-for="(parish, index) in filteredParishes" :key="parish.parishId"
                                 class="border-t border-gray-200 hover:bg-gray-50">
                                 <td class="px-3 md:px-4 py-2 text-xs md:text-sm">
                                     {{ index + 1 }}
@@ -75,8 +79,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div v-if="parishes.length === 0" class="text-center text-gray-500 py-4">
-                    Chưa có đạo nào.
+                <div v-if="filteredParishes.length === 0" class="text-center text-gray-500 py-4">
+                    {{ searchQuery ? 'Không tìm thấy kết quả phù hợp.' : 'Chưa có đạo nào.' }}
                 </div>
             </div>
         </div>
@@ -87,12 +91,22 @@
 import { useToast } from "@/composables/useToast";
 import { deleteParish, getAllParish } from "@/services/parishService";
 import { ParishDto } from "@/types/parish.type";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 
 const { showToast } = useToast();
 const parishes = ref<ParishDto[]>([]);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
+const searchQuery = ref("");
+
+const filteredParishes = computed(() => {
+    if (!searchQuery.value.trim()) return parishes.value;
+    const q = searchQuery.value.toLowerCase().trim();
+    return parishes.value.filter(p =>
+        p.name?.toLowerCase().includes(q) ||
+        p.deanery?.name?.toLowerCase().includes(q)
+    );
+});
 
 async function loadParishes() {
     try {

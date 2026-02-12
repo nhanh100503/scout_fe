@@ -46,6 +46,21 @@
                             </p>
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-gray-700">Ngành đang sinh hoạt <span
+                                    class="text-red-500">*
+                                </span></label>
+                            <select v-model="currentMajorId"
+                                class="mt-1 w-full border border-gray-300 rounded-md px-3 py-2">
+                                <option value="null">-- Chọn ngành hiện tại --</option>
+                                <option v-for="item in majors" :key="item.majorId" :value="item.majorId">
+                                    {{ item.name }}
+                                </option>
+                                <p v-if="errors.currentMajorId" class="mt-1 text-xs text-red-500 break-words">
+                                    {{ errors.currentMajorId }}
+                                </p>
+                            </select>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-700">Đội/Nhóm <span class="text-red-500">*
                                 </span></label>
                             <select v-model="form.teamId" :class="inputClass(errors.teamId)">
@@ -147,21 +162,7 @@
                             </p>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Ngành đang sinh hoạt <span
-                                class="text-red-500">*
-                            </span></label>
-                        <select v-model="currentMajorId"
-                            class="mt-1 w-full border border-gray-300 rounded-md px-3 py-2">
-                            <option value="null">-- Chọn ngành hiện tại --</option>
-                            <option v-for="item in majors" :key="item.majorId" :value="item.majorId">
-                                {{ item.name }}
-                            </option>
-                            <p v-if="errors.currentMajorId" class="mt-1 text-xs text-red-500 break-words">
-                                {{ errors.currentMajorId }}
-                            </p>
-                        </select>
-                    </div>
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Trách vụ <span class="text-red-500">*
                             </span></label>

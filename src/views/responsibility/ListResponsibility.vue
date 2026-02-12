@@ -18,6 +18,10 @@
                 </option>
             </select>
         </div>
+        <div class="px-4 md:px-6 mb-4">
+            <input v-model="searchQuery" type="text" placeholder="🔍 Tìm kiếm theo tên trách vụ..."
+                class="w-full md:w-1/2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+        </div>
 
         <div class="flex-1 overflow-auto px-4 md:px-6 pb-6">
             <div class="bg-white rounded-lg shadow">
@@ -40,7 +44,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(resp, index) in responsibilities" :key="resp.responsibilityId"
+                            <tr v-for="(resp, index) in filteredResponsibilities" :key="resp.responsibilityId"
                                 class="border-t border-gray-200 hover:bg-gray-50">
                                 <td class="px-3 md:px-4 py-2 text-xs md:text-sm">
                                     {{ index + 1 }}
@@ -84,8 +88,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div v-if="responsibilities.length === 0 && selectedMajorId" class="text-center text-gray-500 py-4">
-                    Ngành này chưa có trách vụ nào.
+                <div v-if="filteredResponsibilities.length === 0 && selectedMajorId" class="text-center text-gray-500 py-4">
+                    {{ searchQuery ? 'Không tìm thấy kết quả phù hợp.' : 'Ngành này chưa có trách vụ nào.' }}
                 </div>
             </div>
         </div>
@@ -93,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { getAllMajor } from "@/services/majorService";
 import { getAllResponsibilitiesByMajorId } from "@/services/responsibilityService";
 import type { MajorDto } from "@/types/major.type";
@@ -102,6 +106,13 @@ import type { ResponsibilityDto } from "@/types/responsibility.type";
 const majors = ref<MajorDto[]>([]);
 const responsibilities = ref<ResponsibilityDto[]>([]);
 const selectedMajorId = ref<number | "">("");
+const searchQuery = ref("");
+
+const filteredResponsibilities = computed(() => {
+    if (!searchQuery.value.trim()) return responsibilities.value;
+    const q = searchQuery.value.toLowerCase().trim();
+    return responsibilities.value.filter(r => r.name?.toLowerCase().includes(q));
+});
 
 onMounted(async () => {
     const res = await getAllMajor();

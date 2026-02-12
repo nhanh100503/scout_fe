@@ -124,6 +124,32 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Team Members Section -->
+            <div v-if="hasAnyRole(['ADMIN', 'DT', 'HT'])" class="mt-6 bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4 text-emerald-700">Danh sách Đoàn sinh</h3>
+                <div v-if="team.members && team.members.length > 0" class="space-y-2">
+                    <div v-for="member in team.members" :key="member.memberId"
+                        class="flex items-center justify-between p-3 bg-gray-50 rounded border border-gray-200">
+                        <div class="flex items-center gap-3">
+                            <img v-if="member.avatar" :src="member.avatar"
+                                class="w-10 h-10 rounded-full object-cover" alt="Avatar" />
+                            <div v-else class="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-semibold">
+                                {{ member.name.charAt(0).toUpperCase() }}
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">{{ member.name }}</p>
+                                <p class="text-xs text-gray-500">{{ member.email }}</p>
+                            </div>
+                        </div>
+                        <button @click="handleRemoveMemberFromTeam(member.memberId)"
+                            class="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600">
+                            Xóa khỏi đội
+                        </button>
+                    </div>
+                </div>
+                <p v-else class="text-sm text-gray-500 italic">Chưa có đoàn sinh nào trong đội/nhóm này.</p>
+            </div>
             </template>
 
             <div v-else-if="!loading" class="bg-red-50 p-4 rounded text-red-700 border border-red-200">
@@ -144,7 +170,7 @@ import { assignLeaderToTeam, removeLeaderFromTeam } from "@/services/teamLeaderS
 import { getAllDeanery } from "@/services/deaneryService";
 import { getParishesByDeaneryId } from "@/services/parishService";
 import { getAllMajor } from "@/services/majorService";
-import { getAllMembers } from "@/services/memberService";
+import { getAllLeaders, updateMemberTeam } from "@/services/memberService";
 import { TeamUpdateRequest } from "@/types/team.type";
 import { DeaneryDto } from "@/types/deanery.type";
 import { ParishDto } from "@/types/parish.type";
@@ -180,8 +206,7 @@ const availableLeaders = computed(() => {
     if (!team.value || !allMembers.value) return [];
     const currentLeaderIds = team.value.teamLeaders?.map((tl: any) => tl.leaderId) || [];
     return allMembers.value.filter((m: any) =>
-        !currentLeaderIds.includes(m.memberId) &&
-        m.memberRoles?.some((mr: any) => ['HT', 'DT', 'ADMIN'].includes(mr.role?.name))
+        !currentLeaderIds.includes(m.memberId)
     );
 });
 
@@ -211,9 +236,9 @@ onMounted(async () => {
             }
         }
 
-        // Load all members for team leader selection
+        // Load all leaders for team leader selection
         if (hasAnyRole(['ADMIN', 'DT', 'HT'])) {
-            const resMembers = await getAllMembers();
+            const resMembers = await getAllLeaders();
             if (resMembers.code === 200) {
                 allMembers.value = resMembers.data;
             }
@@ -270,6 +295,9 @@ async function handleAssignLeader() {
             leaderId: selectedLeaderId.value
         });
         if (res.code === 201 || res.code === 200) {
+            // Also update the member's teamId
+            await updateMemberTeam(selectedLeaderId.value, teamId);
+
             showToast("Gán huynh trưởng thành công", "success");
             selectedLeaderId.value = null;
             // Reload team data
@@ -290,6 +318,10 @@ async function handleRemoveLeader(leaderId: number) {
     try {
         const res = await removeLeaderFromTeam(teamId, leaderId);
         if (res.code === 200) {
+            // Also remove the member's teamId (set to null) - OPTIONAL but likely desired
+            // If we remove them as leader, we often remove them from the team too
+            await updateMemberTeam(leaderId, null);
+
             showToast("Xóa huynh trưởng thành công", "success");
             // Reload team data
             const reloadRes = await getTeamById(teamId);
@@ -299,6 +331,23 @@ async function handleRemoveLeader(leaderId: number) {
         }
     } catch (error: any) {
         showToast(error.message || "Xóa huynh trưởng thất bại", "error");
+    }
+}
+
+async function handleRemoveMemberFromTeam(memberId: number) {
+    if (!confirm("Bạn có chắc muốn xóa đoàn sinh này khỏi đội/nhóm?")) return;
+    try {
+        // Set the member's teamId to null to remove them from the team
+        await updateMemberTeam(memberId, null);
+        showToast("Xóa đoàn sinh khỏi đội thành công", "success");
+
+        // Reload team data
+        const reloadRes = await getTeamById(teamId);
+        if (reloadRes.code === 200) {
+            team.value = reloadRes.data;
+        }
+    } catch (error: any) {
+        showToast(error.message || "Xóa đoàn sinh thất bại", "error");
     }
 }
 </script>

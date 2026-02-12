@@ -9,6 +9,10 @@
                 + Thêm người dùng
             </router-link>
         </div>
+        <div class="px-4 md:px-6 mb-4">
+            <input v-model="searchQuery" type="text" placeholder="🔍 Tìm kiếm theo tên, email, SĐT..."
+                class="w-full md:w-1/2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+        </div>
         <div v-if="showConfirm" class="fixed inset-0 flex items-center justify-center z-50">
             <div class="bg-white rounded-lg shadow-lg p-6 w-120 border border-gray-300">
                 <h3 class="text-lg font-semibold mb-4">Xác nhận xóa</h3>
@@ -50,7 +54,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(user, index) in users" :key="user.memberId"
+                            <tr v-for="(user, index) in filteredUsers" :key="user.memberId"
                                 class="border-t border-gray-200 hover:bg-gray-50">
                                 <td class="px-3 md:px-4 py-2 text-xs md:text-sm">
                                     {{ index + 1 }}
@@ -87,15 +91,15 @@
                         </tbody>
                     </table>
                 </div>
-                <div v-if="users.length === 0" class="text-center text-gray-500 py-4">
-                    Chưa có người dùng nào.
+                <div v-if="filteredUsers.length === 0" class="text-center text-gray-500 py-4">
+                    {{ searchQuery ? 'Không tìm thấy kết quả phù hợp.' : 'Chưa có người dùng nào.' }}
                 </div>
             </div>
         </div>
     </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useToast } from "@/composables/useToast";
 import { UserDto } from "@/types/user.type";
 import { deleteUser, getAllUser } from "@/services/userService";
@@ -105,7 +109,18 @@ import { getLS } from "@/tools/localStorage.tool";
 const users = ref<UserDto[]>([]);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
+const searchQuery = ref("");
 const { toast, showToast } = useToast();
+
+const filteredUsers = computed(() => {
+    if (!searchQuery.value.trim()) return users.value;
+    const q = searchQuery.value.toLowerCase().trim();
+    return users.value.filter(u =>
+        u.name?.toLowerCase().includes(q) ||
+        u.email?.toLowerCase().includes(q) ||
+        u.phone?.toLowerCase().includes(q)
+    );
+});
 
 async function fetchUsers() {
     try {
