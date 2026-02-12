@@ -9,6 +9,10 @@
                 + Thêm đoàn sinh
             </router-link>
         </div>
+        <div class="px-4 md:px-6 mb-4">
+            <input v-model="searchQuery" type="text" placeholder="🔍 Tìm kiếm theo tên..."
+                class="w-full md:w-1/2 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm" />
+        </div>
         <div v-if="showConfirm" class="fixed inset-0 flex items-center justify-center z-50">
             <div class="bg-white rounded-lg shadow-lg p-6 w-120 border border-gray-300">
                 <h3 class="text-lg font-semibold mb-4">Xác nhận xóa</h3>
@@ -57,7 +61,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(member, index) in members" :key="member.memberId"
+                            <tr v-for="(member, index) in filteredMembers" :key="member.memberId"
                                 class="border-t border-gray-200 hover:bg-gray-50">
                                 <td class="px-3 md:px-4 py-2 text-xs md:text-sm">
                                     {{ index + 1 }}
@@ -109,8 +113,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div v-if="members.length === 0" class="text-center text-gray-500 py-4">
-                    Chưa có đoàn sinh nào.
+                <div v-if="filteredMembers.length === 0" class="text-center text-gray-500 py-4">
+                    {{ searchQuery ? 'Không tìm thấy kết quả phù hợp.' : 'Chưa có đoàn sinh nào.' }}
                 </div>
             </div>
         </div>
@@ -121,7 +125,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import type { MemberDto } from "@/types/member.type";
 import { deleteMemberById, getAllMemberRoleDS } from "@/services/memberService";
 import { formatDate } from "@/utils/dateFormat";
@@ -136,7 +140,14 @@ const showRankHistory = ref(false);
 const selectedMemberId = ref<number>(0);
 const selectedMemberName = ref<string>("");
 const deleteId = ref<number | null>(null);
+const searchQuery = ref("");
 const { toast, showToast } = useToast();
+
+const filteredMembers = computed(() => {
+    if (!searchQuery.value.trim()) return members.value;
+    const q = searchQuery.value.toLowerCase().trim();
+    return members.value.filter(m => m.name?.toLowerCase().includes(q));
+});
 
 async function fetchMembers() {
     try {

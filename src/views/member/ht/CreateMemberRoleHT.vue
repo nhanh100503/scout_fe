@@ -46,6 +46,18 @@
                             </p>
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-gray-700">Ngành đang sinh hoạt <span
+                                    class="text-red-500">*
+                                </span></label>
+                            <select v-model="currentMajorId"
+                                class="mt-1 w-full border border-gray-300 rounded-md px-3 py-2">
+                                <option value="" disabled>-- Chọn ngành hiện tại --</option>
+                                <option v-for="item in majors" :key="item.majorId" :value="item.majorId">
+                                    {{ item.name }}
+                                </option>
+                            </select>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-700">Đội/Nhóm <span class="text-red-500">*
                                 </span></label>
                             <select v-model="form.teamId" :class="inputClass(errors.teamId)">
@@ -199,18 +211,6 @@
                                     {{ errors.majors }}
                                 </p>
                             </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Ngành đang sinh hoạt <span
-                                    class="text-red-500">*
-                                </span></label>
-                            <select v-model="currentMajorId"
-                                class="mt-1 w-full border border-gray-300 rounded-md px-3 py-2">
-                                <option value="" disabled>-- Chọn ngành hiện tại --</option>
-                                <option v-for="item in majors" :key="item.majorId" :value="item.majorId">
-                                    {{ item.name }}
-                                </option>
-                            </select>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

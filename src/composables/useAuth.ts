@@ -76,12 +76,20 @@ export function useAuth() {
         return userRoles.includes('DS');
     });
 
+    /**
+     * Check if user can select deanery (only ADMIN)
+     */
+    const canSelectDeanery = computed(() => {
+        return hasAnyRole(['ADMIN']);
+    });
+
     return {
         currentMember,
         setMember,
         clearMember,
         canModifyActivity,
         canAccessAttendance,
+        canSelectDeanery,
         hasAnyRole,
         isDSOnly
     };

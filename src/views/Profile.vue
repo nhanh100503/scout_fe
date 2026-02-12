@@ -24,7 +24,6 @@
                                         alt="avatar"
                                         class="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover bg-white"
                                     />
-                                    <!-- Upload Overlay -->
                                     <label 
                                         for="avatar-upload"
                                         class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
@@ -45,7 +44,6 @@
                                         @change="handleFileSelect"
                                         :disabled="isUploading"
                                     />
-                                    <!-- Loading Spinner -->
                                     <div 
                                         v-if="isUploading"
                                         class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full"
@@ -56,7 +54,6 @@
                                         </svg>
                                     </div>
                                 </div>
-                                <!-- Upload Button (Mobile) -->
                                 <button
                                     v-if="selectedFile && !isUploading"
                                     @click="handleUpload"
@@ -82,7 +79,6 @@
                             </div>
                         </div>
 
-                        <!-- Upload Button (Desktop) -->
                         <button
                             v-if="selectedFile && !isUploading"
                             @click="handleUpload"
@@ -128,7 +124,7 @@
                     <!-- Info Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Personal Information -->
-                        <div class="space-y-4">
+                        <div class="space-y-1">
                             <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
                                 <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -136,35 +132,31 @@
                                 Thông tin cá nhân
                             </h3>
                             
-                            <InfoItem label="Email" :value="currentMember?.email" icon="mail" />
-                            <InfoItem label="Số điện thoại" :value="currentMember?.phone" icon="phone" />
-                            <InfoItem label="Ngày sinh" :value="formatDate(currentMember?.birthday)" icon="calendar" />
-                            <InfoItem label="Giới tính" :value="currentMember?.gender?.name" icon="user" />
-                            <InfoItem label="CMND/CCCD" :value="currentMember?.identify" icon="card" />
-                            <InfoItem label="Nơi sinh" :value="currentMember?.placeOfBirth" icon="location" />
-                            <InfoItem label="Địa chỉ" :value="currentMember?.address" icon="home" />
-                            <InfoItem label="Nghề nghiệp" :value="currentMember?.career" icon="briefcase" />
+                            <div v-for="item in personalInfo" :key="item.label" class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                                <span class="text-lg mt-0.5">{{ item.icon }}</span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs text-gray-500 mb-0.5">{{ item.label }}</p>
+                                    <p class="text-sm font-medium text-gray-800 break-words">{{ item.value || 'Chưa cập nhật' }}</p>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Scout Information -->
-                        <div class="space-y-4">
+                        <div class="space-y-1">
                             <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
                                 <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                                 </svg>
-                                Thông tin Huynh trưởng
+                                Thông tin Hướng đạo
                             </h3>
                             
-                            <InfoItem label="Cấp bậc" :value="currentMember?.rank?.name" icon="star" />
-                            <InfoItem label="Tôn giáo" :value="currentMember?.religion?.name" icon="book" />
-                            <InfoItem label="Chức vụ" :value="currentMember?.responsibility?.name" icon="shield" />
-                            <InfoItem label="Nhiệm vụ khác" :value="currentMember?.otherResponsibility" icon="clipboard" />
-                            <InfoItem label="Năm bắt đầu" :value="currentMember?.startYear" icon="calendar" />
-                            <InfoItem label="Năm tuyên hứa" :value="currentMember?.pledgeYear" icon="calendar" />
-                            <InfoItem label="Giáo xứ" :value="currentMember?.parish" icon="church" />
-                            <InfoItem label="Liên đoàn" :value="currentMember?.federation" icon="users" />
-                            <InfoItem label="Đội" :value="currentMember?.team" icon="flag" />
-                            <InfoItem label="Hạt" :value="currentMember?.deanery?.name" icon="map" />
+                            <div v-for="item in scoutInfo" :key="item.label" class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                                <span class="text-lg mt-0.5">{{ item.icon }}</span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs text-gray-500 mb-0.5">{{ item.label }}</p>
+                                    <p class="text-sm font-medium text-gray-800 break-words">{{ item.value || 'Chưa cập nhật' }}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -174,7 +166,7 @@
                             <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                             </svg>
-                            Ngành học
+                            Ngành
                         </h3>
                         <div class="flex flex-wrap gap-2">
                             <span 
@@ -193,7 +185,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useAuth } from '@/composables/useAuth';
 import { uploadAvatar } from '@/services/memberService';
 import defaultAvatarImg from '@/assets/avatar.png';
@@ -209,6 +201,45 @@ const successMessage = ref('');
 
 const defaultAvatar = defaultAvatarImg;
 
+// Helper to safely get name from a field that could be string or object
+function getName(field: any): string | undefined {
+    if (!field) return undefined;
+    if (typeof field === 'string') return field;
+    return field.name;
+}
+
+// Computed info arrays for v-for rendering
+const personalInfo = computed(() => {
+    const m = currentMember.value;
+    if (!m) return [];
+    return [
+        { label: 'Email', value: m.email, icon: '📧' },
+        { label: 'Số điện thoại', value: m.phone, icon: '📱' },
+        { label: 'Ngày sinh', value: formatDate(m.birthday), icon: '🎂' },
+        { label: 'Giới tính', value: m.gender?.name, icon: '👤' },
+        { label: 'CMND/CCCD', value: m.identify, icon: '🪪' },
+        { label: 'Nơi sinh', value: m.placeOfBirth, icon: '📍' },
+        { label: 'Địa chỉ', value: m.address, icon: '🏠' },
+        { label: 'Nghề nghiệp', value: m.career, icon: '💼' },
+        { label: 'Tôn giáo', value: m.religion?.name, icon: '📖' },
+    ];
+});
+
+const scoutInfo = computed(() => {
+    const m = currentMember.value;
+    if (!m) return [];
+    return [
+        { label: 'Cấp bậc', value: m.rank?.name, icon: '⭐' },
+        { label: 'Chức vụ', value: m.responsibility?.name, icon: '🛡️' },
+        { label: 'Nhiệm vụ khác', value: m.otherResponsibility, icon: '📋' },
+        { label: 'Năm bắt đầu', value: m.startYear, icon: '📅' },
+        { label: 'Năm tuyên hứa', value: m.pledgeYear, icon: '🤝' },
+        { label: 'Hạt', value: m.deanery?.name, icon: '🗺️' },
+        { label: 'Giáo xứ', value: getName(m.parish), icon: '⛪' },
+        { label: 'Liên đoàn', value: getName(m.federation), icon: '👥' },
+        { label: 'Đội/Nhóm', value: getName(m.team), icon: '🚩' },
+    ];
+});
 
 // File validation
 const validateFile = (file: File): string | null => {
@@ -233,11 +264,9 @@ const handleFileSelect = (event: Event) => {
 
     if (!file) return;
 
-    // Clear previous messages
     errorMessage.value = '';
     successMessage.value = '';
 
-    // Validate file
     const validationError = validateFile(file);
     if (validationError) {
         errorMessage.value = validationError;
@@ -246,10 +275,8 @@ const handleFileSelect = (event: Event) => {
         return;
     }
 
-    // Set selected file and preview
     selectedFile.value = file;
     
-    // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
         avatarPreview.value = e.target?.result as string;
@@ -269,15 +296,12 @@ const handleUpload = async () => {
         const response = await uploadAvatar(currentMember.value.memberId, selectedFile.value);
         
         if (response.code === 200 && response.data) {
-            // Update current member with new avatar
             setMember(response.data);
             successMessage.value = 'Cập nhật ảnh đại diện thành công!';
             
-            // Clear selection
             selectedFile.value = null;
             avatarPreview.value = null;
             
-            // Clear success message after 3 seconds
             setTimeout(() => {
                 successMessage.value = '';
             }, 3000);
@@ -293,95 +317,13 @@ const handleUpload = async () => {
 };
 
 // Format date
-const formatDate = (dateString?: string | null): string => {
-    if (!dateString) return 'Chưa cập nhật';
+const formatDate = (dateString?: string | null): string | undefined => {
+    if (!dateString) return undefined;
     try {
         const date = new Date(dateString);
         return date.toLocaleDateString('vi-VN');
     } catch {
         return dateString;
-    }
-};
-</script>
-
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-// InfoItem Component
-const InfoItem = defineComponent({
-    name: 'InfoItem',
-    props: {
-        label: { type: String, required: true },
-        value: { type: String, default: null },
-        icon: { type: String, default: 'info' }
-    },
-    template: `
-        <div class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-            <div class="mt-0.5">
-                <svg v-if="icon === 'mail'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <svg v-else-if="icon === 'phone'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                <svg v-else-if="icon === 'calendar'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <svg v-else-if="icon === 'user'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <svg v-else-if="icon === 'card'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
-                </svg>
-                <svg v-else-if="icon === 'location'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <svg v-else-if="icon === 'home'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-                <svg v-else-if="icon === 'briefcase'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <svg v-else-if="icon === 'star'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                </svg>
-                <svg v-else-if="icon === 'book'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <svg v-else-if="icon === 'shield'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                <svg v-else-if="icon === 'clipboard'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <svg v-else-if="icon === 'church'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                <svg v-else-if="icon === 'users'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                <svg v-else-if="icon === 'flag'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-                </svg>
-                <svg v-else-if="icon === 'map'" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                </svg>
-                <svg v-else class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-xs text-gray-500 mb-0.5">{{ label }}</p>
-                <p class="text-sm font-medium text-gray-800 break-words">{{ value || 'Chưa cập nhật' }}</p>
-            </div>
-        </div>
-    `
-});
-
-export default {
-    components: {
-        InfoItem
     }
 };
 </script>
