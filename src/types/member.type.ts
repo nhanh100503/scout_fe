@@ -166,6 +166,7 @@ export interface MemberDto {
     parishId?: number;
     federationId?: number;
     teamId: number;
+    team?: { teamId: number; name: string } | null;
     avatar?: string;
 
     deanery?: DeaneryDto;

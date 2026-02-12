@@ -36,7 +36,7 @@
                     </option>
                 </select>
             </div>
-            <div>
+            <div v-if="canSelectDeanery">
                 <label for="team" class="block text-sm font-medium text-gray-700 mb-2">
                     Lọc theo đội/nhóm
                 </label>
@@ -154,7 +154,7 @@ import type { ApiResponse } from "@/types/api.type";
 import { formatDate } from "@/utils/dateFormat";
 
 const { showToast } = useToast();
-const { canModifyActivity, canAccessAttendance, canSelectDeanery, currentMember } = useAuth();
+const { canModifyActivity, canAccessAttendance, canSelectDeanery, isDSOnly, currentMember } = useAuth();
 const deaneries = ref<DeaneryDto[]>([]);
 const activities = ref<ActivityDto[]>([]);
 const teams = ref<TeamDto[]>([]);

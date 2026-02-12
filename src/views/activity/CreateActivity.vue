@@ -4,7 +4,29 @@
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Thêm sinh hoạt mới</h2>
             <form class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
                 <div class="flex-1 overflow-y-auto space-y-6">
+
+                    <!-- Activity Type Selector -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Cấp sinh hoạt <span class="text-red-500">*</span>
+                        </label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <button v-for="opt in activityTypeOptions" :key="opt.value" type="button"
+                                :class="[
+                                    'px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-all duration-200',
+                                    form.activityType === opt.value
+                                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm'
+                                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                                ]"
+                                @click="onActivityTypeChange(opt.value)">
+                                {{ opt.icon }} {{ opt.label }}
+                            </button>
+                        </div>
+                        <p v-if="errors.activityType" class="mt-1 text-xs text-red-500 break-words">{{ errors.activityType }}</p>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Deanery (always shown if canSelectDeanery) -->
                         <div v-if="canSelectDeanery">
                             <label class="block text-sm font-medium text-gray-700">
                                 Châu <span class="text-red-500">*</span>
@@ -17,16 +39,47 @@
                             </select>
                             <p v-if="errors.deaneryId" class="mt-1 text-xs text-red-500 break-words">{{ errors.deaneryId }}</p>
                         </div>
-                        <div>
+
+                        <!-- Parish (shown when type is PARISH) -->
+                        <div v-if="form.activityType === 'PARISH'">
                             <label class="block text-sm font-medium text-gray-700">
-                                Đội/Nhóm <span class="text-xs text-gray-400">(tùy chọn — bỏ trống = cấp châu)</span>
+                                Giáo xứ <span class="text-red-500">*</span>
                             </label>
-                            <select v-model="form.teamId" :class="inputClass('')">
-                                <option :value="null">-- Tất cả (cấp châu) --</option>
+                            <select v-model="form.parishId" :class="inputClass(errors.parishId)">
+                                <option :value="null" disabled>-- Chọn giáo xứ --</option>
+                                <option v-for="p in parishes" :key="p.parishId" :value="p.parishId">
+                                    {{ p.name }}
+                                </option>
+                            </select>
+                            <p v-if="errors.parishId" class="mt-1 text-xs text-red-500 break-words">{{ errors.parishId }}</p>
+                        </div>
+
+                        <!-- Major (shown when type is MAJOR) -->
+                        <div v-if="form.activityType === 'MAJOR'">
+                            <label class="block text-sm font-medium text-gray-700">
+                                Ngành <span class="text-red-500">*</span>
+                            </label>
+                            <select v-model="form.majorId" :class="inputClass(errors.majorId)">
+                                <option :value="null" disabled>-- Chọn ngành --</option>
+                                <option v-for="m in majors" :key="m.majorId" :value="m.majorId">
+                                    {{ m.name }}
+                                </option>
+                            </select>
+                            <p v-if="errors.majorId" class="mt-1 text-xs text-red-500 break-words">{{ errors.majorId }}</p>
+                        </div>
+
+                        <!-- Team (shown when type is TEAM) -->
+                        <div v-if="form.activityType === 'TEAM'">
+                            <label class="block text-sm font-medium text-gray-700">
+                                Đội/Nhóm <span class="text-red-500">*</span>
+                            </label>
+                            <select v-model="form.teamId" :class="inputClass(errors.teamId)">
+                                <option :value="null" disabled>-- Chọn đội/nhóm --</option>
                                 <option v-for="t in teams" :key="t.teamId" :value="t.teamId">
                                     {{ t.name }}
                                 </option>
                             </select>
+                            <p v-if="errors.teamId" class="mt-1 text-xs text-red-500 break-words">{{ errors.teamId }}</p>
                         </div>
                     </div>
 
@@ -135,24 +188,40 @@ import { useToast } from "@/composables/useToast";
 import { useAuth } from "@/composables/useAuth";
 import { inputClass } from "@/utils/inputClass";
 import type { ApiResponse } from "@/types/api.type";
-import { ActivityCreateRequest, PlanRowInput, ValidationErrorActivity } from "@/types/activity.type";
+import { ActivityCreateRequest, ActivityType, PlanRowInput, ValidationErrorActivity } from "@/types/activity.type";
 import { createActivity } from "@/services/activityService";
 import { getAllDeanery } from "@/services/deaneryService";
+import { getParishesByDeaneryId } from "@/services/parishService";
+import { getAllMajor } from "@/services/majorService";
 import { getTeamsByDeaneryId } from "@/services/teamService";
 import type { DeaneryDto } from "@/types/deanery.type";
+import type { ParishDto } from "@/types/parish.type";
+import type { MajorDto } from "@/types/major.type";
 import type { TeamDto } from "@/types/team.type";
 
+const activityTypeOptions = [
+    { value: 'DEANERY' as ActivityType, label: 'Cấp Châu', icon: '🏛️' },
+    { value: 'PARISH' as ActivityType, label: 'Cấp Xứ', icon: '⛪' },
+    { value: 'MAJOR' as ActivityType, label: 'Cấp Ngành', icon: '🎯' },
+    { value: 'TEAM' as ActivityType, label: 'Cấp Đội', icon: '👥' },
+];
+
 const form = ref<ActivityCreateRequest>({
+    activityType: 'DEANERY',
     date: "",
     time: "",
     description: "",
     note: "",
     deaneryId: null as any,
+    parishId: null,
+    majorId: null,
     teamId: null,
 });
 
 const errors = ref<ValidationErrorActivity>({});
 const deaneries = ref<DeaneryDto[]>([]);
+const parishes = ref<ParishDto[]>([]);
+const majors = ref<MajorDto[]>([]);
 const teams = ref<TeamDto[]>([]);
 const { showToast } = useToast();
 const { canModifyActivity, canSelectDeanery, currentMember } = useAuth();
@@ -183,10 +252,13 @@ async function initializeView() {
     } else {
         if (currentMember.value?.deaneryId) {
             form.value.deaneryId = currentMember.value.deaneryId;
-            // Fetch teams for the auto-selected deanery
-            await fetchTeamsForDeanery(Number(form.value.deaneryId));
+            // Fetch dependent data for the auto-selected deanery
+            await fetchDependentData(Number(form.value.deaneryId));
         }
     }
+
+    // Always load majors (they are global, not deanery-dependent)
+    await fetchMajors();
 }
 
 onMounted(async () => {
@@ -204,6 +276,35 @@ watch(currentMember, (newVal) => {
     }
 })
 
+async function fetchDependentData(deaneryId: number) {
+    await Promise.all([
+        fetchParishesForDeanery(deaneryId),
+        fetchTeamsForDeanery(deaneryId),
+    ]);
+}
+
+async function fetchParishesForDeanery(deaneryId: number) {
+    try {
+        const res = await getParishesByDeaneryId(deaneryId);
+        if (res.code === 200) {
+            parishes.value = res.data;
+        }
+    } catch (e) {
+        console.error("Không tải được danh sách giáo xứ", e);
+    }
+}
+
+async function fetchMajors() {
+    try {
+        const res = await getAllMajor();
+        if (res.code === 200) {
+            majors.value = res.data;
+        }
+    } catch (e) {
+        console.error("Không tải được danh sách ngành", e);
+    }
+}
+
 async function fetchTeamsForDeanery(deaneryId: number) {
     try {
         const res = await getTeamsByDeaneryId(deaneryId);
@@ -215,11 +316,21 @@ async function fetchTeamsForDeanery(deaneryId: number) {
     }
 }
 
-async function onDeaneryChange() {
+function onActivityTypeChange(type: ActivityType) {
+    form.value.activityType = type;
+    // Clear the sub-fields when changing type
+    form.value.parishId = null;
+    form.value.majorId = null;
     form.value.teamId = null;
+}
+
+async function onDeaneryChange() {
+    form.value.parishId = null;
+    form.value.teamId = null;
+    parishes.value = [];
     teams.value = [];
     if (form.value.deaneryId) {
-        await fetchTeamsForDeanery(form.value.deaneryId);
+        await fetchDependentData(form.value.deaneryId);
     }
 }
 
