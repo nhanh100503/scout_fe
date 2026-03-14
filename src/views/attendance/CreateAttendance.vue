@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-4xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Điểm danh sinh hoạt</h2>
-            <div v-if="activity" class="bg-white rounded-lg shadow p-4 mb-6">
+            <LoadingScreen v-if="loading" />
+            <div v-else-if="activity" class="bg-white rounded-lg shadow p-4 mb-6">
                 <div class="grid grid-cols-2 grid-rows-2 gap-y-4 gap-x-6 text-sm">
                     <div class="flex items-center">
                         <span class="font-medium text-gray-600 w-24">Ngày:</span>
@@ -91,6 +92,7 @@ import { getActivityById } from "@/services/activityService";
 import { createAttendance, getAttendanceByActivity, getMembersForMyTeamAttendance, getAllTeamsForActivity } from "@/services/attendanceService";
 import type { AttendanceCreateRequest, AttendanceDto, MemberAttendanceRequest } from "@/types/attendance.type";
 import { formatDate } from "@/utils/dateFormat";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const { showToast } = useToast();
 const { hasAnyRole } = useAuth();

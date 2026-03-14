@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-2xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Chi tiết đạo</h2>
-            <div v-if="parish" class="space-y-4">
+            <LoadingScreen v-if="isPageLoading" />
+            <div v-else-if="parish" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
                         Châu
@@ -39,12 +40,14 @@ import type { ApiResponse } from "@/types/api.type";
 import { useToast } from "@/composables/useToast";
 import { ParishDto } from "@/types/parish.type";
 import { getParishById } from "@/services/parishService";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const errors = ref<any>({});
 const { showToast } = useToast();
 const route = useRoute();
 const parish = ref<ParishDto | null>(null);
 const parishId = Number(route.params.parishId);
+const isPageLoading = ref(true);
 
 onMounted(async () => {
     try {
@@ -58,6 +61,8 @@ onMounted(async () => {
             errors.value = apiRes.data;
         }
         showToast(apiRes.message, "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 </script>

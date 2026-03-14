@@ -3,7 +3,8 @@
         <div class="max-w-4xl mx-auto w-full p-6">
             <h2 class="text-xl font-semibold mb-6 text-emerald-700">Cập nhật đội/nhóm</h2>
             
-            <template v-if="team">
+            <LoadingScreen v-if="loading" />
+            <template v-else-if="team">
             <form class="bg-white rounded-lg shadow p-6 space-y-6" @submit.prevent="handleSubmit">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -152,7 +153,7 @@
             </div>
             </template>
 
-            <div v-else-if="!loading" class="bg-red-50 p-4 rounded text-red-700 border border-red-200">
+            <div v-else class="bg-red-50 p-4 rounded text-red-700 border border-red-200">
                 Không tìm thấy thông tin đội/nhóm hoặc bạn không có quyền truy cập.
             </div>
         </div>
@@ -177,6 +178,7 @@ import { DeaneryDto } from "@/types/deanery.type";
 import { ParishDto } from "@/types/parish.type";
 import { MajorDto } from "@/types/major.type";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const route = useRoute();
 const router = useRouter();

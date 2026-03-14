@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col h-screen">
+    <div class="flex flex-col h-full">
         <div class="flex items-center justify-between px-4 md:px-6 pt-6 mb-4">
             <h2 class="text-lg md:text-xl font-semibold text-emerald-700">
                 Danh sách đạo trưởng
@@ -21,7 +21,8 @@
                 </div>
             </div>
         </div>
-        <div class="flex-1 overflow-auto px-4 md:px-6 pb-6">
+        <LoadingScreen v-if="isPageLoading" />
+        <div v-else class="flex-1 overflow-auto px-4 md:px-6 pb-6">
             <div class="bg-white rounded-lg shadow">
                 <div class="overflow-x-auto">
                     <table class="min-w-full border-collapse">
@@ -107,11 +108,13 @@ import type { MemberDto } from "@/types/member.type";
 import { deleteMemberById, getAllMemberRoleDT } from "@/services/memberService";
 import { formatDate } from "@/utils/dateFormat";
 import { useToast } from "@/composables/useToast";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const members = ref<MemberDto[]>([]);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
 const { toast, showToast } = useToast();
+const isPageLoading = ref(true);
 
 async function fetchMembers() {
     try {
@@ -153,7 +156,11 @@ async function confirmDelete() {
     }
 }
 
-onMounted(() => {
-    fetchMembers();
+onMounted(async () => {
+    try {
+        await fetchMembers();
+    } finally {
+        isPageLoading.value = false;
+    }
 });
 </script>

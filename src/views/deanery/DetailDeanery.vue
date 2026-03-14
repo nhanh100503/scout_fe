@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-2xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Chi tiết châu</h2>
-            <div v-if="deanery" class="">
+            <LoadingScreen v-if="isPageLoading" />
+            <div v-else-if="deanery" class="">
                 <label class="block text-sm font-medium text-gray-700">
                     Tên châu <span class="text-red-500">*</span>
                 </label>
@@ -30,12 +31,14 @@ import type { ApiResponse } from "@/types/api.type";
 import { useToast } from "@/composables/useToast";
 import { DeaneryDto, ValidationErrorDeanery } from "@/types/deanery.type";
 import { getDeaneryById } from "@/services/deaneryService";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const errors = ref<ValidationErrorDeanery>({});
 const { toast, showToast } = useToast();
 const route = useRoute();
 const deanery = ref<DeaneryDto | null>(null);
 const deaneryId = Number(route.params.deaneryId);
+const isPageLoading = ref(true);
 onMounted(async () => {
     try {
         const res: ApiResponse<DeaneryDto> = await getDeaneryById(deaneryId);
@@ -48,6 +51,8 @@ onMounted(async () => {
             errors.value = apiRes.data as ValidationErrorDeanery;
         }
         showToast(apiRes.message, "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 </script>

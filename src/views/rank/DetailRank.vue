@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-2xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Chi tiết đẳng thứ</h2>
-            <div v-if="rank" class="space-y-4">
+            <LoadingScreen v-if="isPageLoading" />
+            <div v-else-if="rank" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
                         Tên đẳng thứ <span class="text-red-500">*</span>
@@ -48,12 +49,14 @@ import type { ApiResponse } from "@/types/api.type";
 import { useToast } from "@/composables/useToast";
 import { RankDto, ValidationErrorRank } from "@/types/rank.type";
 import { getRankById } from "@/services/rankService";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const errors = ref<ValidationErrorRank>({});
 const { toast, showToast } = useToast();
 const route = useRoute();
 const rank = ref<RankDto | null>(null);
 const rankId = Number(route.params.rankId);
+const isPageLoading = ref(true);
 onMounted(async () => {
     try {
         const res: ApiResponse<RankDto> = await getRankById(rankId);
@@ -66,6 +69,8 @@ onMounted(async () => {
             errors.value = apiRes.data as ValidationErrorRank;
         }
         showToast(apiRes.message, "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 </script>

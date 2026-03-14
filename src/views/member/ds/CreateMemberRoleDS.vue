@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-4xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Tạo đoàn sinh mới</h2>
-            <form class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
+            <LoadingScreen v-if="isPageLoading" />
+            <form v-else class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
                 <div class="flex-1 overflow-y-auto space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -215,6 +216,7 @@ import { useToast } from "@/composables/useToast";
 import { useLoading } from "@/composables/useLoading";
 import { inputClass } from "@/utils/inputClass";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 const form = ref<MemberRoleDSCreateRequest>({
     name: "",
     email: "",
@@ -245,6 +247,7 @@ const selectedPastMajors = ref<number[]>([]);
 const currentMajorId = ref<number | "">("");
 const { toast, showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
+const isPageLoading = ref(true);
 
 
 onMounted(async () => {
@@ -262,6 +265,8 @@ onMounted(async () => {
         genders.value = resGender.data;
     } catch (error) {
         showToast(error, "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 

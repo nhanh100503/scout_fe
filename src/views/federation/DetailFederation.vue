@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-2xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Chi tiết liên đoàn</h2>
-            <div v-if="federation" class="space-y-4">
+            <LoadingScreen v-if="isPageLoading" />
+            <div v-else-if="federation" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
                         Châu
@@ -46,12 +47,14 @@ import type { ApiResponse } from "@/types/api.type";
 import { useToast } from "@/composables/useToast";
 import { FederationDto } from "@/types/federation.type";
 import { getFederationById } from "@/services/federationService";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const errors = ref<any>({});
 const { showToast } = useToast();
 const route = useRoute();
 const federation = ref<FederationDto | null>(null);
 const federationId = Number(route.params.federationId);
+const isPageLoading = ref(true);
 
 onMounted(async () => {
     try {
@@ -65,6 +68,8 @@ onMounted(async () => {
             errors.value = apiRes.data;
         }
         showToast(apiRes.message, "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 </script>

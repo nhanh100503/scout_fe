@@ -3,7 +3,8 @@
         <div class="max-w-2xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Cập nhật tôn giáo</h2>
 
-            <form v-if="religion" class="" @submit.prevent="handleSubmit">
+            <LoadingScreen v-if="isPageLoading" />
+            <form v-else-if="religion" class="" @submit.prevent="handleSubmit">
                 <label class="block text-sm font-medium text-gray-700">
                     Tên tôn giáo <span class="text-red-500">*</span>
                 </label>
@@ -38,6 +39,7 @@ import { inputClass } from "@/utils/inputClass";
 import { ReligionDto, ReligionUpdateRequest, ValidationErrorReligion } from "@/types/religion.type";
 import { getReligionById, updateReligion } from "@/services/religionService";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const errors = ref<ValidationErrorReligion>({});
 const { showToast } = useToast();
@@ -49,6 +51,7 @@ const religion = ref<ReligionDto | null>(null);
 const form = ref<ReligionUpdateRequest>({ name: "" });
 
 const religionId = Number(route.params.religionId);
+const isPageLoading = ref(true);
 
 onMounted(async () => {
     try {
@@ -63,6 +66,8 @@ onMounted(async () => {
             errors.value = apiRes.data as ValidationErrorReligion;
         }
         showToast(apiRes.message, "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 

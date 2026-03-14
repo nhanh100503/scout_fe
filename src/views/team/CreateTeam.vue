@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-4xl mx-auto w-full p-6">
             <h2 class="text-xl font-semibold mb-6 text-emerald-700">Tạo đội/nhóm mới</h2>
-            <form class="bg-white rounded-lg shadow p-6 space-y-6" @submit.prevent="handleSubmit">
+            <LoadingScreen v-if="isPageLoading" />
+            <form v-else class="bg-white rounded-lg shadow p-6 space-y-6" @submit.prevent="handleSubmit">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Tên đội/nhóm <span class="text-red-500">*</span></label>
@@ -71,11 +72,13 @@ import { DeaneryDto } from "@/types/deanery.type";
 import { ParishDto } from "@/types/parish.type";
 import { MajorDto } from "@/types/major.type";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const router = useRouter();
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
 const errors = ref<any>({});
+const isPageLoading = ref(true);
 
 const deaneryId = ref<number | null>(null);
 const deaneries = ref<DeaneryDto[]>([]);
@@ -97,6 +100,8 @@ onMounted(async () => {
         majors.value = resMajors.data;
     } catch (e) {
         showToast("Không thể tải dữ liệu", "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 

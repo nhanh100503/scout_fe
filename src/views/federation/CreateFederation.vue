@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-2xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Thêm liên đoàn mới</h2>
-            <form class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
+            <LoadingScreen v-if="isPageLoading" />
+            <form v-else class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
                 <div class="flex-1 overflow-y-auto space-y-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">
@@ -71,6 +72,7 @@ import { getParishesByDeaneryId } from "@/services/parishService";
 import { DeaneryDto } from "@/types/deanery.type";
 import { ParishDto } from "@/types/parish.type";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const form = ref<FederationCreateRequest>({ name: "", parishId: null });
 const errors = ref<any>({});
@@ -79,6 +81,7 @@ const parishes = ref<ParishDto[]>([]);
 const selectedDeaneryId = ref<number | "">("");
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
+const isPageLoading = ref(true);
 
 onMounted(async () => {
     try {
@@ -86,6 +89,8 @@ onMounted(async () => {
         deaneries.value = res.data;
     } catch (error: any) {
         showToast(error.message, "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 

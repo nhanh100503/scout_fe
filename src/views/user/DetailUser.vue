@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-4xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Thông tin người dùng</h2>
-            <div v-if="user" class="space-y-4 flex-1 flex flex-col">
+            <LoadingScreen v-if="isPageLoading" />
+            <div v-else-if="user" class="space-y-4 flex-1 flex flex-col">
                 <div class="flex-1 overflow-y-auto space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -64,11 +65,13 @@ import { getUserById } from "@/services/userService";
 import { UserDto } from "@/types/user.type";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const route = useRoute();
 const memberId = Number(route.params.memberId);
 
 const user = ref<UserDto | null>(null);
+const isPageLoading = ref(true);
 const toast = ref<{ type: string; message: string } | null>(null);
 
 onMounted(async () => {
@@ -80,6 +83,8 @@ onMounted(async () => {
         }
     } catch (err: any) {
         toast.value = { type: "error", message: err.message };
+    } finally {
+        isPageLoading.value = false;
     }
 });
 
