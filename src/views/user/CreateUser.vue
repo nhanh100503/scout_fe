@@ -53,10 +53,9 @@
                             </p>
                         </div>
                     </div>
-                    <button type="submit"
-                        class="mt-2 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">
+                    <LoadingButton :loading="isLoading" loading-text="Đang lưu..." base-class="mt-2 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 inline-flex items-center justify-center transition-opacity duration-200">
                         Lưu người dùng
-                    </button>
+                    </LoadingButton>
                 </div>
             </form>
         </div>
@@ -70,9 +69,11 @@ import { getAllGenders } from "@/services/genderService";
 import { ApiResponse } from "@/types/api.type";
 import router from "@/routers";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { inputClass } from "@/utils/inputClass";
 import { UserCreateRequest, ValidationErrorUser } from "@/types/user.type";
 import { createUser } from "@/services/userService";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const form = ref<UserCreateRequest>({
     name: "",
@@ -86,6 +87,7 @@ const form = ref<UserCreateRequest>({
 const genders = ref<GenderDto[]>([]);
 const errors = ref<ValidationErrorUser>({});
 const { showToast } = useToast();
+const { isLoading, withLoading } = useLoading();
 
 onMounted(async () => {
     try {
@@ -97,19 +99,20 @@ onMounted(async () => {
 });
 
 async function handleSubmit() {
-    try {
-        const res = await createUser(form.value);
-        if (res.code === 201) {
-            showToast(res.message, "success");
-            console.log("User created:", res.data);
-            router.push("/users");
+    await withLoading(async () => {
+        try {
+            const res = await createUser(form.value);
+            if (res.code === 201) {
+                showToast(res.message, "success");
+                router.push("/users");
+            }
+        } catch (error: any) {
+            const apiRes: ApiResponse<any> = error;
+            if (apiRes.code === 400 && apiRes.data) {
+                errors.value = apiRes.data as ValidationErrorUser;
+            }
+            showToast(apiRes.message, "error");
         }
-    } catch (error: any) {
-        const apiRes: ApiResponse<any> = error;
-        if (apiRes.code === 400 && apiRes.data) {
-            errors.value = apiRes.data as ValidationErrorUser;
-        }
-        showToast(apiRes.message, "error");
-    }
+    });
 }
 </script>

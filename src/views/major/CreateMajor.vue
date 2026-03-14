@@ -17,10 +17,9 @@
                             <router-link to="/majors" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm">
                                 Hủy
                             </router-link>
-                            <button type="submit"
-                                class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 text-sm">
+                            <LoadingButton :loading="isLoading" loading-text="Đang lưu...">
                                 Lưu ngành
-                            </button>
+                            </LoadingButton>
                         </div>
                     </div>
                 </div>
@@ -34,29 +33,34 @@
 import { ref } from "vue";
 import router from "@/routers";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { inputClass } from "@/utils/inputClass";
 import type { ApiResponse } from "@/types/api.type";
 import { MajorCreateRequest, ValidationErrorMajor } from "@/types/major.type";
 import { createMajor } from "@/services/majorService";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const form = ref<MajorCreateRequest>({ name: "" });
 const errors = ref<ValidationErrorMajor>({});
 const { showToast } = useToast();
+const { isLoading, withLoading } = useLoading();
 
 async function handleSubmit() {
     errors.value = {};
-    try {
-        const res = await createMajor(form.value);
-        if (res.code === 200) {
-            showToast(res.message, "success");
-            router.push("/majors");
+    await withLoading(async () => {
+        try {
+            const res = await createMajor(form.value);
+            if (res.code === 200) {
+                showToast(res.message, "success");
+                router.push("/majors");
+            }
+        } catch (error: any) {
+            const apiRes: ApiResponse<any> = error;
+            if (apiRes.code === 400 && apiRes.data) {
+                errors.value = apiRes.data as ValidationErrorMajor;
+            }
+            showToast(apiRes.message, "error");
         }
-    } catch (error: any) {
-        const apiRes: ApiResponse<any> = error;
-        if (apiRes.code === 400 && apiRes.data) {
-            errors.value = apiRes.data as ValidationErrorMajor;
-        }
-        showToast(apiRes.message, "error");
-    }
+    });
 }
 </script>

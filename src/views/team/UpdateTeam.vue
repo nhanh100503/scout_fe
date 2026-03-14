@@ -62,9 +62,9 @@
                     <button type="button" @click="$router.push('/teams')" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
                         Quay lại
                     </button>
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 shadow-sm" :disabled="loading">
-                        {{ loading ? 'Đang lưu...' : 'Cập nhật' }}
-                    </button>
+                    <LoadingButton :loading="isLoading" loading-text="Đang lưu..." base-class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 shadow-sm inline-flex items-center justify-center transition-opacity duration-200">
+                        Cập nhật
+                    </LoadingButton>
                 </div>
             </form>
             
@@ -163,6 +163,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { useAuth } from "@/composables/useAuth";
 import { inputClass } from "@/utils/inputClass";
 import { getTeamById, updateTeam } from "@/services/teamService";
@@ -175,6 +176,7 @@ import { TeamUpdateRequest } from "@/types/team.type";
 import { DeaneryDto } from "@/types/deanery.type";
 import { ParishDto } from "@/types/parish.type";
 import { MajorDto } from "@/types/major.type";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -183,6 +185,7 @@ const { hasAnyRole } = useAuth();
 const teamId = Number(route.params.teamId);
 
 const loading = ref(false);
+const { isLoading, withLoading } = useLoading();
 const errors = ref<any>({});
 const team = ref<any>(null);
 
@@ -269,21 +272,20 @@ async function handleSubmit() {
 
     if (Object.keys(errors.value).length > 0) return;
 
-    loading.value = true;
-    try {
-        const res = await updateTeam(teamId, form.value);
-        if (res.code === 200) {
-            showToast(res.message, "success");
-            router.push("/teams");
+    await withLoading(async () => {
+        try {
+            const res = await updateTeam(teamId, form.value);
+            if (res.code === 200) {
+                showToast(res.message, "success");
+                router.push("/teams");
+            }
+        } catch (error: any) {
+            if (error.code === 400 && error.data) {
+                errors.value = error.data;
+            }
+            showToast(error.message || "Cập nhật thất bại", "error");
         }
-    } catch (error: any) {
-        if (error.code === 400 && error.data) {
-            errors.value = error.data;
-        }
-        showToast(error.message || "Cập nhật thất bại", "error");
-    } finally {
-        loading.value = false;
-    }
+    });
 }
 
 async function handleAssignLeader() {

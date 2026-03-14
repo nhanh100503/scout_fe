@@ -60,7 +60,7 @@
                     <p v-if="errors.note" class="mt-1 text-xs text-red-500 break-words">{{ errors.note }}</p>
                 </div>
 
-                <!-- Plan Rows Table -->
+                <!-- Bảng kế hoạch sinh hoạt -->
                 <div>
                     <h3 class="text-lg font-semibold text-emerald-700 mb-3">📋 Kế hoạch sinh hoạt</h3>
                     <div class="overflow-x-auto bg-white rounded-lg shadow border border-gray-200">
@@ -114,10 +114,9 @@
                     <router-link to="/activities" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm">
                         Quay lại
                     </router-link>
-                    <button type="submit"
-                        class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 text-sm">
+                    <LoadingButton :loading="isLoading" loading-text="Đang cập nhật..." base-class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 text-sm inline-flex items-center justify-center transition-opacity duration-200">
                         Cập nhật sinh hoạt
-                    </button>
+                    </LoadingButton>
                 </div>
             </form>
 
@@ -131,6 +130,7 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { ApiResponse } from "@/types/api.type";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { useAuth } from "@/composables/useAuth";
 import { inputClass } from "@/utils/inputClass";
 import type { ActivityDto, ActivityUpdateRequest, PlanRowInput, ValidationErrorActivity } from "@/types/activity.type";
@@ -139,15 +139,18 @@ import { getAllDeanery } from "@/services/deaneryService";
 import { getTeamsByDeaneryId } from "@/services/teamService";
 import type { DeaneryDto } from "@/types/deanery.type";
 import type { TeamDto } from "@/types/team.type";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const errors = ref<ValidationErrorActivity>({});
 const { showToast } = useToast();
+const { isLoading, withLoading } = useLoading();
 const { canModifyActivity } = useAuth();
 const route = useRoute();
 const router = useRouter();
 
 const activity = ref<ActivityDto | null>(null);
 const form = ref<ActivityUpdateRequest>({
+    activityType: 'DEANERY',
     date: "",
     time: "",
     description: "",
@@ -160,7 +163,7 @@ const deaneries = ref<DeaneryDto[]>([]);
 const teams = ref<TeamDto[]>([]);
 const activityId = Number(route.params.activityId);
 
-// Initialize 10 plan rows
+// Khởi tạo 10 hàng kế hoạch
 const planRows = ref<PlanRowInput[]>(
     Array.from({ length: 10 }, (_, i) => ({
         startTime: "",
@@ -180,10 +183,11 @@ onMounted(async () => {
     }
 
     try {
-        // Load activity data
+        // Tải dữ liệu sinh hoạt
         const res: ApiResponse<ActivityDto> = await getActivityById(activityId);
         if (res.code === 200) {
             activity.value = res.data;
+            form.value.activityType = res.data.activityType;
             form.value.date = res.data.date;
             form.value.time = res.data.time;
             form.value.description = res.data.description;
@@ -191,9 +195,9 @@ onMounted(async () => {
             form.value.deaneryId = res.data.deanery?.deaneryId ?? 0;
             form.value.teamId = res.data.team?.teamId ?? null;
 
-            // Populate plan rows from API response
+            // Điền dữ liệu kế hoạch từ API
             if (res.data.planRows && res.data.planRows.length > 0) {
-                // Fill existing rows and pad to 10
+                // Điền các hàng hiện có và bổ sung đủ 10 hàng
                 const existingRows: PlanRowInput[] = res.data.planRows.map(r => ({
                     startTime: r.startTime || "",
                     content: r.content || "",
@@ -212,13 +216,13 @@ onMounted(async () => {
             }
         }
 
-        // Load deaneries
+        // Tải danh sách châu
         const deaneryRes: ApiResponse<DeaneryDto[]> = await getAllDeanery();
         if (deaneryRes.code === 200) {
             deaneries.value = deaneryRes.data;
         }
 
-        // Load teams for current deanery
+        // Tải danh sách đội/nhóm theo châu hiện tại
         if (form.value.deaneryId) {
             const teamRes = await getTeamsByDeaneryId(form.value.deaneryId);
             if (teamRes.code === 200) {
@@ -251,28 +255,29 @@ async function onDeaneryChange() {
 
 async function handleSubmit() {
     errors.value = {};
-    try {
-        // Filter out empty plan rows
-        const filledRows = planRows.value.filter(
-            r => r.startTime || r.content || r.pic || r.materials || r.notes
-        );
+    await withLoading(async () => {
+        try {
+            const filledRows = planRows.value.filter(
+                r => r.startTime || r.content || r.pic || r.materials || r.notes
+            );
 
-        const payload: ActivityUpdateRequest = {
-            ...form.value,
-            planRows: filledRows.length > 0 ? filledRows : undefined,
-        };
+            const payload: ActivityUpdateRequest = {
+                ...form.value,
+                planRows: filledRows.length > 0 ? filledRows : undefined,
+            };
 
-        const res = await updateActivity(activityId, payload);
-        if (res.code === 200) {
-            showToast(res.message, "success");
-            router.push("/activities");
+            const res = await updateActivity(activityId, payload);
+            if (res.code === 200) {
+                showToast(res.message, "success");
+                router.push("/activities");
+            }
+        } catch (error: any) {
+            const apiRes: ApiResponse<any> = error;
+            if (apiRes.code === 400 && apiRes.data) {
+                errors.value = apiRes.data as ValidationErrorActivity;
+            }
+            showToast(apiRes.message, "error");
         }
-    } catch (error: any) {
-        const apiRes: ApiResponse<any> = error;
-        if (apiRes.code === 400 && apiRes.data) {
-            errors.value = apiRes.data as ValidationErrorActivity;
-        }
-        showToast(apiRes.message, "error");
-    }
+    });
 }
 </script>

@@ -17,9 +17,14 @@
                     <button @click="showConfirm = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
                         Hủy
                     </button>
-                    <button @click="confirmDelete" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                    <LoadingButton
+                        type="button"
+                        :loading="isLoading"
+                        loading-text="Đang xóa..."
+                        base-class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 inline-flex items-center justify-center transition-opacity duration-200"
+                        @click="confirmDelete">
                         Chắc chắn
-                    </button>
+                    </LoadingButton>
                 </div>
             </div>
         </div>
@@ -79,14 +84,17 @@
 
 <script setup lang="ts">
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { deleteReligion, getAllReligion } from "@/services/religionService";
 import { ReligionDto } from "@/types/religion.type";
 import { ref, onMounted } from "vue";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const religions = ref<ReligionDto[]>([]);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
 const { showToast } = useToast();
+const { isLoading, withLoading } = useLoading();
 
 
 async function loadReligions() {
@@ -105,15 +113,18 @@ function openConfirm(id: number) {
 
 async function confirmDelete() {
     if (!deleteId.value) return;
-    showConfirm.value = false;
-    try {
-        const res = await deleteReligion(deleteId.value);
-        if (res.code === 200) {
-            await loadReligions();
-            showToast(res.message, "success");
+    await withLoading(async () => {
+        try {
+            const res = await deleteReligion(deleteId.value!);
+            if (res.code === 200) {
+                showConfirm.value = false;
+                await loadReligions();
+                showToast(res.message, "success");
+            }
+        } catch (error: any) {
+            showToast(error.message, "error");
         }
-    } catch (error: any) {
-        showToast(error.message, "error");
-    }
+    });
+    showConfirm.value = false;
 }
 </script>

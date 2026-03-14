@@ -46,10 +46,9 @@
                     <router-link to="/federations" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm">
                         Quay lại
                     </router-link>
-                    <button type="submit"
-                        class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 text-sm">
+                    <LoadingButton :loading="isLoading" loading-text="Đang cập nhật...">
                         Cập nhật liên đoàn
-                    </button>
+                    </LoadingButton>
                 </div>
             </form>
 
@@ -63,6 +62,7 @@ import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { ApiResponse } from "@/types/api.type";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { inputClass } from "@/utils/inputClass";
 import { FederationDto, FederationUpdateRequest } from "@/types/federation.type";
 import { getFederationById, updateFederation } from "@/services/federationService";
@@ -70,9 +70,11 @@ import { getAllDeanery } from "@/services/deaneryService";
 import { getParishesByDeaneryId } from "@/services/parishService";
 import { DeaneryDto } from "@/types/deanery.type";
 import { ParishDto } from "@/types/parish.type";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const errors = ref<any>({});
 const { showToast } = useToast();
+const { isLoading, withLoading } = useLoading();
 const route = useRoute();
 const router = useRouter();
 
@@ -129,18 +131,20 @@ async function onDeaneryChange() {
 
 async function handleSubmit() {
     errors.value = {};
-    try {
-        const res = await updateFederation(federationId, form.value);
-        if (res.code === 200) {
-            showToast(res.message, "success");
-            router.push("/federations");
+    await withLoading(async () => {
+        try {
+            const res = await updateFederation(federationId, form.value);
+            if (res.code === 200) {
+                showToast(res.message, "success");
+                router.push("/federations");
+            }
+        } catch (error: any) {
+            const apiRes: ApiResponse<any> = error;
+            if (apiRes.code === 400 && apiRes.data) {
+                errors.value = apiRes.data;
+            }
+            showToast(apiRes.message, "error");
         }
-    } catch (error: any) {
-        const apiRes: ApiResponse<any> = error;
-        if (apiRes.code === 400 && apiRes.data) {
-            errors.value = apiRes.data;
-        }
-        showToast(apiRes.message, "error");
-    }
+    });
 }
 </script>

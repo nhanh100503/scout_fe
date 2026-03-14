@@ -37,10 +37,9 @@
                         <router-link to="/ranks" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm">
                             Hủy
                         </router-link>
-                        <button type="submit"
-                            class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 text-sm">
+                        <LoadingButton :loading="isLoading" loading-text="Đang lưu...">
                             Lưu đẳng thứ
-                        </button>
+                        </LoadingButton>
                     </div>
                 </div>
             </form>
@@ -54,29 +53,34 @@
 import { ref } from "vue";
 import router from "@/routers";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { inputClass } from "@/utils/inputClass";
 import type { ApiResponse } from "@/types/api.type";
 import { RankCreateRequest, ValidationErrorRank } from "@/types/rank.type";
 import { createRank } from "@/services/rankService";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const form = ref<RankCreateRequest>({ name: "", type: true });
 const errors = ref<ValidationErrorRank>({});
 const { showToast } = useToast();
+const { isLoading, withLoading } = useLoading();
 
 async function handleSubmit() {
     errors.value = {};
-    try {
-        const res = await createRank(form.value);
-        if (res.code === 200) {
-            showToast(res.message, "success");
-            router.push("/ranks");
+    await withLoading(async () => {
+        try {
+            const res = await createRank(form.value);
+            if (res.code === 200) {
+                showToast(res.message, "success");
+                router.push("/ranks");
+            }
+        } catch (error: any) {
+            const apiRes: ApiResponse<any> = error;
+            if (apiRes.code === 400 && apiRes.data) {
+                errors.value = apiRes.data as ValidationErrorRank;
+            }
+            showToast(apiRes.message, "error");
         }
-    } catch (error: any) {
-        const apiRes: ApiResponse<any> = error;
-        if (apiRes.code === 400 && apiRes.data) {
-            errors.value = apiRes.data as ValidationErrorRank;
-        }
-        showToast(apiRes.message, "error");
-    }
+    });
 }
 </script>

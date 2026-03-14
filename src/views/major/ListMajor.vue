@@ -21,9 +21,14 @@
                     <button @click="showConfirm = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
                         Hủy
                     </button>
-                    <button @click="confirmDelete" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                    <LoadingButton
+                        type="button"
+                        :loading="isLoading"
+                        loading-text="Đang xóa..."
+                        base-class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 inline-flex items-center justify-center transition-opacity duration-200"
+                        @click="confirmDelete">
                         Chắc chắn
-                    </button>
+                    </LoadingButton>
                 </div>
             </div>
         </div>
@@ -83,11 +88,14 @@
 
 <script setup lang="ts">
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { deleteMajor, getAllMajorAndDeleteFlag } from "@/services/majorService";
 import { MajorDto } from "@/types/major.type";
 import { ref, onMounted, computed } from "vue";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const { showToast } = useToast();
+const { isLoading, withLoading } = useLoading();
 const majors = ref<MajorDto[]>([]);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
@@ -115,15 +123,18 @@ function openConfirm(id: number) {
 
 async function confirmDelete() {
     if (!deleteId.value) return;
-    showConfirm.value = false;
-    try {
-        const res = await deleteMajor(deleteId.value);
-        if (res.code === 200) {
-            await loadMajors();
-            showToast(res.message, "success");
+    await withLoading(async () => {
+        try {
+            const res = await deleteMajor(deleteId.value!);
+            if (res.code === 200) {
+                showConfirm.value = false;
+                await loadMajors();
+                showToast(res.message, "success");
+            }
+        } catch (error: any) {
+            showToast(error.message, "error");
         }
-    } catch (error: any) {
-        showToast(error.message, "error");
-    }
+    });
+    showConfirm.value = false;
 }
 </script>

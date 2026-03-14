@@ -241,9 +241,9 @@
                     </div>
                 </div>
                 <div class="pt-4">
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">
+                    <LoadingButton :loading="isLoading" loading-text="Đang lưu..." base-class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 inline-flex items-center justify-center transition-opacity duration-200">
                         Lưu huynh trưởng
-                    </button>
+                    </LoadingButton>
                 </div>
             </form>
         </div>
@@ -274,7 +274,9 @@ import { getTeamsByDeaneryIdAndMajorId, getTeamsByParishIdAndMajorId } from "@/s
 import { ApiResponse } from "@/types/api.type";
 import router from "@/routers";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { inputClass } from "@/utils/inputClass";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 const form = ref<MemberRoleHTCreateRequest>({
     name: "",
     birthday: "",
@@ -308,6 +310,7 @@ const responsibilities = ref<ResponsibilityDto[]>([]);
 const genders = ref<GenderDto[]>([])
 const errors = ref<ValidationErrorMember>({});
 const { toast, showToast } = useToast();
+const { isLoading, withLoading } = useLoading();
 
 onMounted(async () => {
     try {
@@ -437,7 +440,6 @@ const onParishChange = async () => {
 };
 
 async function handleSubmit() {
-    console.log(form.value);
     const birthdayYear = form.value.birthday ? new Date(form.value.birthday).getFullYear() : null;
 
     if (form.value.startYear) {
@@ -462,19 +464,20 @@ async function handleSubmit() {
         }
     }
 
-    try {
-        const res = await createMemberRoleHT(form.value);
-        if (res.code === 201) {
-            showToast(res.message, "success");
-            router.push("/members/ht")
+    await withLoading(async () => {
+        try {
+            const res = await createMemberRoleHT(form.value);
+            if (res.code === 201) {
+                showToast(res.message, "success");
+                router.push("/members/ht");
+            }
+        } catch (error: any) {
+            const apiRes: ApiResponse<any> = error;
+            if (apiRes.code === 400 && apiRes.data) {
+                errors.value = apiRes.data as ValidationErrorMember;
+            }
+            showToast(apiRes.message, "error");
         }
-
-    } catch (error: any) {
-        const apiRes: ApiResponse<any> = error;
-        if (apiRes.code === 400 && apiRes.data) {
-            errors.value = apiRes.data as ValidationErrorMember;
-        }
-        showToast(apiRes.message, "error");
-    }
+    });
 }
 </script>
