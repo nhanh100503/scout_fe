@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col h-screen">
+    <div class="flex flex-col h-full">
         <div class="flex items-center justify-between px-4 md:px-6 pt-6 mb-4">
             <h2 class="text-lg md:text-xl font-semibold text-emerald-700">
                 Danh sách đẳng thứ
@@ -32,7 +32,8 @@
                 </div>
             </div>
         </div>
-        <div class="flex-1 overflow-auto px-4 md:px-6 pb-6">
+        <LoadingScreen v-if="isPageLoading" />
+        <div v-else class="flex-1 overflow-auto px-4 md:px-6 pb-6">
             <div class="bg-white rounded-lg shadow">
                 <div class="overflow-x-auto">
                     <table class="min-w-full border-collapse">
@@ -99,6 +100,7 @@ import { deleteRank, getAllRank } from "@/services/rankService";
 import { RankDto } from "@/types/rank.type";
 import { ref, onMounted, computed } from "vue";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
@@ -106,6 +108,7 @@ const ranks = ref<RankDto[]>([]);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
 const searchQuery = ref("");
+const isPageLoading = ref(true);
 
 const filteredRanks = computed(() => {
     if (!searchQuery.value.trim()) return ranks.value;
@@ -119,7 +122,11 @@ async function loadRanks() {
 }
 
 onMounted(async () => {
-    await loadRanks();
+    try {
+        await loadRanks();
+    } finally {
+        isPageLoading.value = false;
+    }
 });
 
 function openConfirm(id: number) {

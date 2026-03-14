@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col h-screen">
+    <div class="flex flex-col h-full">
         <div class="flex items-center justify-between px-4 md:px-6 pt-6 mb-4">
             <h2 class="text-lg md:text-xl font-semibold text-emerald-700">
                 Danh sách tôn giáo
@@ -28,7 +28,8 @@
                 </div>
             </div>
         </div>
-        <div class="flex-1 overflow-auto px-4 md:px-6 pb-6">
+        <LoadingScreen v-if="isPageLoading" />
+        <div v-else class="flex-1 overflow-auto px-4 md:px-6 pb-6">
             <div class="bg-white rounded-lg shadow">
                 <div class="overflow-x-auto">
                     <table class="min-w-full border-collapse">
@@ -89,12 +90,14 @@ import { deleteReligion, getAllReligion } from "@/services/religionService";
 import { ReligionDto } from "@/types/religion.type";
 import { ref, onMounted } from "vue";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const religions = ref<ReligionDto[]>([]);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
+const isPageLoading = ref(true);
 
 
 async function loadReligions() {
@@ -103,7 +106,11 @@ async function loadReligions() {
 }
 
 onMounted(async () => {
-    await loadReligions();
+    try {
+        await loadReligions();
+    } finally {
+        isPageLoading.value = false;
+    }
 });
 
 function openConfirm(id: number) {

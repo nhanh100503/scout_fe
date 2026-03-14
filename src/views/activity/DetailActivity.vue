@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto bg-gray-50">
         <div class="max-w-4xl mx-auto w-full p-4 md:p-8 flex-1">
             <!-- Journal/Newspaper Style View -->
-            <div v-if="activity" class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <LoadingScreen v-if="isPageLoading" />
+            <div v-else-if="activity" class="bg-white shadow-lg rounded-lg overflow-hidden">
                 <!-- Header Section -->
                 <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 md:px-8 py-6 md:py-8">
                     <div class="flex items-center justify-between mb-4">
@@ -375,6 +376,7 @@ import { createComment, deleteComment } from "@/services/commentService";
 import { formatDate } from "@/utils/dateFormat";
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const { showToast } = useToast();
 const { canModifyActivity, canAccessAttendance, currentMember } = useAuth();
@@ -388,6 +390,7 @@ const replyContent = ref("");
 const replyingTo = ref<number | null>(null);
 const isSubmitting = ref(false);
 const activityId = Number(route.params.activityId);
+const isPageLoading = ref(true);
 
 // Activity Log State
 const showLogForm = ref(false);
@@ -677,7 +680,11 @@ const removeLog = async (logId: number) => {
 };
 
 onMounted(async () => {
-    await loadActivity();
-    await loadActivityLogs();
+    try {
+        await loadActivity();
+        await loadActivityLogs();
+    } finally {
+        isPageLoading.value = false;
+    }
 });
 </script>

@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-4xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Cập nhật sinh hoạt</h2>
-            <form v-if="activity" class="space-y-4" @submit.prevent="handleSubmit">
+            <LoadingScreen v-if="isPageLoading" />
+            <form v-else-if="activity" class="space-y-4" @submit.prevent="handleSubmit">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">
@@ -140,10 +141,12 @@ import { getTeamsByDeaneryId } from "@/services/teamService";
 import type { DeaneryDto } from "@/types/deanery.type";
 import type { TeamDto } from "@/types/team.type";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const errors = ref<ValidationErrorActivity>({});
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
+const isPageLoading = ref(true);
 const { canModifyActivity } = useAuth();
 const route = useRoute();
 const router = useRouter();
@@ -235,6 +238,8 @@ onMounted(async () => {
             errors.value = apiRes.data as ValidationErrorActivity;
         }
         showToast(apiRes.message || "Lỗi tải dữ liệu", "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 

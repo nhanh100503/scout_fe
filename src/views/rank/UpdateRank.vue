@@ -3,7 +3,8 @@
         <div class="max-w-2xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Cập nhật đẳng thứ</h2>
 
-            <form v-if="rank" class="space-y-4" @submit.prevent="handleSubmit">
+            <LoadingScreen v-if="isPageLoading" />
+            <form v-else-if="rank" class="space-y-4" @submit.prevent="handleSubmit">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
                         Tên đẳng thứ <span class="text-red-500">*</span>
@@ -57,6 +58,7 @@ import { inputClass } from "@/utils/inputClass";
 import { RankDto, RankUpdateRequest, ValidationErrorRank } from "@/types/rank.type";
 import { getRankById, updateRank } from "@/services/rankService";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const errors = ref<ValidationErrorRank>({});
 const { showToast } = useToast();
@@ -68,6 +70,7 @@ const rank = ref<RankDto | null>(null);
 const form = ref<RankUpdateRequest>({ name: "", type: true });
 
 const rankId = Number(route.params.rankId);
+const isPageLoading = ref(true);
 
 onMounted(async () => {
     try {
@@ -83,6 +86,8 @@ onMounted(async () => {
             errors.value = apiRes.data as ValidationErrorRank;
         }
         showToast(apiRes.message, "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 

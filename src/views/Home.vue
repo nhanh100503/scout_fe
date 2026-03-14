@@ -1,5 +1,6 @@
 <template>
-    <section class="h-full flex flex-col px-4 py-6 bg-gray-50">
+    <LoadingScreen v-if="isPageLoading" />
+    <section v-else class="h-full flex flex-col px-4 py-6 bg-gray-50">
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-900">Bảng điều khiển</h1>
             <p class="mt-2 text-gray-600">
@@ -61,11 +62,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import type { ApiResponse } from "@/types/api.type";
-import { countMember } from "@/services/memberService"; // hàm bạn đã viết
+import { countMember } from "@/services/memberService";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const dsCount = ref<number>(0);
 const htCount = ref<number>(0);
 const totalCount = ref<number>(0);
+const isPageLoading = ref(true);
 
 onMounted(async () => {
     try {
@@ -82,6 +85,8 @@ onMounted(async () => {
         totalCount.value = dsCount.value + htCount.value;
     } catch (error: any) {
         console.error("Lỗi khi lấy số lượng:", error.message);
+    } finally {
+        isPageLoading.value = false;
     }
 });
 </script>

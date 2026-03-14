@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col h-screen">
+    <div class="flex flex-col h-full">
         <div class="flex items-center justify-between px-4 md:px-6 pt-6 mb-4">
             <h2 class="text-lg md:text-xl font-semibold text-emerald-700">
                 Danh sách đội/nhóm
@@ -189,7 +189,7 @@
                     {{ searchQuery ? 'Không tìm thấy kết quả phù hợp.' : 'Không tìm thấy đội/nhóm nào.' }}
                 </div>
                 <div v-if="loading" class="text-center text-emerald-600 py-8">
-                    Đang tải dữ liệu...
+                    <LoadingScreen />
                 </div>
             </div>
         </div>
@@ -205,6 +205,7 @@ import { getAllTeams, deleteTeam, getTeamById } from "@/services/teamService";
 import { getAllMembers, updateMemberTeam } from "@/services/memberService";
 import type { MemberDto } from "@/types/member.type";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const teams = ref<any[]>([]);
 const loading = ref(false);
