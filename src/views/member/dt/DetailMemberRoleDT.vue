@@ -7,7 +7,8 @@
                 {{ toast.message }}
             </div>
 
-            <div v-if="member" class="space-y-4 flex-1 flex flex-col">
+            <LoadingScreen v-if="isPageLoading" />
+            <div v-else-if="member" class="space-y-4 flex-1 flex flex-col">
                 <div class="flex-1 overflow-y-auto space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -146,7 +147,7 @@
                     </router-link>
                 </div>
             </div>
-            <div v-else class="text-center text-gray-500">Đang tải thông tin...</div>
+            <div v-else class="text-center text-gray-500">Không tìm thấy thông tin đạo trưởng</div>
         </div>
     </div>
 </template>
@@ -156,12 +157,14 @@ import { useRoute } from "vue-router";
 import { getMemberById } from "@/services/memberService";
 import type { MemberDto } from "@/types/member.type";
 import { formatDate } from "@/utils/dateFormat";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const route = useRoute();
 const memberId = Number(route.params.memberId);
 
 const member = ref<MemberDto | null>(null);
 const toast = ref<{ type: string; message: string } | null>(null);
+const isPageLoading = ref(true);
 
 onMounted(async () => {
     try {
@@ -172,6 +175,8 @@ onMounted(async () => {
         } 
     } catch (err: any) {
         toast.value = { type: "error", message: err.message };
+    } finally {
+        isPageLoading.value = false;
     }
 });
 

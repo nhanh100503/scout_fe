@@ -3,7 +3,8 @@
         <div class="max-w-2xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Cập nhật đạo</h2>
 
-            <form v-if="parish" class="space-y-4" @submit.prevent="handleSubmit">
+            <LoadingScreen v-if="isPageLoading" />
+            <form v-else-if="parish" class="space-y-4" @submit.prevent="handleSubmit">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
                         Châu <span class="text-red-500">*</span>
@@ -55,6 +56,7 @@ import { getParishById, updateParish } from "@/services/parishService";
 import { getAllDeanery } from "@/services/deaneryService";
 import { DeaneryDto } from "@/types/deanery.type";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const errors = ref<any>({});
 const { showToast } = useToast();
@@ -67,6 +69,7 @@ const form = ref<ParishUpdateRequest>({ name: "", deaneryId: null });
 const deaneries = ref<DeaneryDto[]>([]);
 
 const parishId = Number(route.params.parishId);
+const isPageLoading = ref(true);
 
 onMounted(async () => {
     try {
@@ -87,6 +90,8 @@ onMounted(async () => {
             errors.value = apiRes.data;
         }
         showToast(apiRes.message, "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col h-screen">
+    <div class="flex flex-col h-full">
         <div class="flex items-center justify-between px-4 md:px-6 pt-6 mb-4">
             <h2 class="text-lg md:text-xl font-semibold text-emerald-700">
                 Danh sách liên đoàn
@@ -32,7 +32,8 @@
                 </div>
             </div>
         </div>
-        <div class="flex-1 overflow-auto px-4 md:px-6 pb-6">
+        <LoadingScreen v-if="isPageLoading" />
+        <div v-else class="flex-1 overflow-auto px-4 md:px-6 pb-6">
             <div class="bg-white rounded-lg shadow">
                 <div class="overflow-x-auto">
                     <table class="min-w-full border-collapse">
@@ -105,6 +106,7 @@ import { deleteFederation, getAllFederation } from "@/services/federationService
 import { FederationDto } from "@/types/federation.type";
 import { ref, onMounted, computed } from "vue";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
@@ -112,6 +114,7 @@ const federations = ref<FederationDto[]>([]);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
 const searchQuery = ref("");
+const isPageLoading = ref(true);
 
 const filteredFederations = computed(() => {
     if (!searchQuery.value.trim()) return federations.value;
@@ -133,7 +136,11 @@ async function loadFederations() {
 }
 
 onMounted(async () => {
-    await loadFederations();
+    try {
+        await loadFederations();
+    } finally {
+        isPageLoading.value = false;
+    }
 });
 
 function openConfirm(id: number) {

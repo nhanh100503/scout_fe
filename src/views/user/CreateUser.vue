@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-4xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Tạo người dùng mới</h2>
-            <form class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
+            <LoadingScreen v-if="isPageLoading" />
+            <form v-else class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
                 <div class="flex-1 overflow-y-auto space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -74,6 +75,7 @@ import { inputClass } from "@/utils/inputClass";
 import { UserCreateRequest, ValidationErrorUser } from "@/types/user.type";
 import { createUser } from "@/services/userService";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const form = ref<UserCreateRequest>({
     name: "",
@@ -88,6 +90,7 @@ const genders = ref<GenderDto[]>([]);
 const errors = ref<ValidationErrorUser>({});
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
+const isPageLoading = ref(true);
 
 onMounted(async () => {
     try {
@@ -95,6 +98,8 @@ onMounted(async () => {
         genders.value = resGender.data;
     } catch (error) {
         showToast(error);
+    } finally {
+        isPageLoading.value = false;
     }
 });
 

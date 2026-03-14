@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-4xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Thêm sinh hoạt mới</h2>
-            <form class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
+            <LoadingScreen v-if="isPageLoading" />
+            <form v-else class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
                 <div class="flex-1 overflow-y-auto space-y-6">
 
                     <!-- Activity Type Selector -->
@@ -199,6 +200,7 @@ import type { ParishDto } from "@/types/parish.type";
 import type { MajorDto } from "@/types/major.type";
 import type { TeamDto } from "@/types/team.type";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const activityTypeOptions = [
     { value: 'DEANERY' as ActivityType, label: 'Cấp Châu', icon: '🏛️' },
@@ -226,6 +228,7 @@ const majors = ref<MajorDto[]>([]);
 const teams = ref<TeamDto[]>([]);
 const { showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
+const isPageLoading = ref(true);
 const { canModifyActivity, canSelectDeanery, currentMember } = useAuth();
 
 // Initialize 10 empty plan rows
@@ -269,7 +272,7 @@ onMounted(async () => {
         router.push("/activities");
         return;
     }
-    initializeView();
+    initializeView().finally(() => { isPageLoading.value = false; });
 });
 
 watch(currentMember, (newVal) => {

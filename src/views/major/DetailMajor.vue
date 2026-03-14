@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-2xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Chi tiết ngành</h2>
-            <div v-if="major" class="">
+            <LoadingScreen v-if="isPageLoading" />
+            <div v-else-if="major" class="">
                 <label class="block text-sm font-medium text-gray-700">
                     Tên ngành <span class="text-red-500">*</span>
                 </label>
@@ -30,12 +31,14 @@ import { getMajorById } from "@/services/majorService";
 import type { MajorDto, ValidationErrorMajor } from "@/types/major.type";
 import type { ApiResponse } from "@/types/api.type";
 import { useToast } from "@/composables/useToast";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const errors = ref<ValidationErrorMajor>({});
 const { toast, showToast } = useToast();
 const route = useRoute();
 const major = ref<MajorDto | null>(null);
 const majorId = Number(route.params.majorId);
+const isPageLoading = ref(true);
 onMounted(async () => {
     try {
         const res: ApiResponse<MajorDto> = await getMajorById(majorId);
@@ -48,6 +51,8 @@ onMounted(async () => {
             errors.value = apiRes.data as ValidationErrorMajor;
         }
         showToast(apiRes.message, "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 </script>

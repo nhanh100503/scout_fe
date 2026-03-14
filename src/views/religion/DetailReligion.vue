@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-2xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Chi tiết tôn giáo</h2>
-            <div v-if="religion" class="">
+            <LoadingScreen v-if="isPageLoading" />
+            <div v-else-if="religion" class="">
                 <label class="block text-sm font-medium text-gray-700">
                     Tên tôn giáo <span class="text-red-500">*</span>
                 </label>
@@ -30,12 +31,14 @@ import type { ApiResponse } from "@/types/api.type";
 import { useToast } from "@/composables/useToast";
 import { ReligionDto, ValidationErrorReligion } from "@/types/religion.type";
 import { getReligionById } from "@/services/religionService";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const errors = ref<ValidationErrorReligion>({});
 const { toast, showToast } = useToast();
 const route = useRoute();
 const religion = ref<ReligionDto | null>(null);
 const religionId = Number(route.params.religionId);
+const isPageLoading = ref(true);
 onMounted(async () => {
     try {
         const res: ApiResponse<ReligionDto> = await getReligionById(religionId);
@@ -48,6 +51,8 @@ onMounted(async () => {
             errors.value = apiRes.data as ValidationErrorReligion;
         }
         showToast(apiRes.message, "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 </script>

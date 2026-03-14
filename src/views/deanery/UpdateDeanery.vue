@@ -3,7 +3,8 @@
         <div class="max-w-2xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Cập nhật châu</h2>
 
-            <form v-if="deanery" class="" @submit.prevent="handleSubmit">
+            <LoadingScreen v-if="isPageLoading" />
+            <form v-else-if="deanery" class="" @submit.prevent="handleSubmit">
                 <label class="block text-sm font-medium text-gray-700">
                     Tên ngành <span class="text-red-500">*</span>
                 </label>
@@ -37,6 +38,7 @@ import { inputClass } from "@/utils/inputClass";
 import { DeaneryDto, DeaneryUpdateRequest, ValidationErrorDeanery } from "@/types/deanery.type";
 import { getDeaneryById, updateDeanery } from "@/services/deaneryService";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const errors = ref<ValidationErrorDeanery>({});
 const { showToast } = useToast();
@@ -48,6 +50,7 @@ const deanery = ref<DeaneryDto | null>(null);
 const form = ref<DeaneryUpdateRequest>({ name: "" });
 
 const deaneryId = Number(route.params.deaneryId);
+const isPageLoading = ref(true);
 
 onMounted(async () => {
     try {
@@ -62,6 +65,8 @@ onMounted(async () => {
             errors.value = apiRes.data as ValidationErrorDeanery;
         }
         showToast(apiRes.message, "error");
+    } finally {
+        isPageLoading.value = false;
     }
 });
 

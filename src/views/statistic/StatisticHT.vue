@@ -17,7 +17,8 @@
         </header>
 
         <main class="flex-1 px-4 pb-6 flex flex-col gap-6">
-            <section class="flex-[1]">
+            <LoadingScreen v-if="isPageLoading" />
+            <section v-if="!isPageLoading" class="flex-[1]">
                 <h3 class="text-lg font-semibold text-emerald-600 mb-4">Thống kê số lượng nam nữ</h3>
                 <div class="flex flex-col gap-4">
                     <div v-for="stat in (stats.length ? stats : [{ roleName: 'Huynh trưởng', total: 0, maleCount: 0, femaleCount: 0 }])"
@@ -38,7 +39,7 @@
                     </div>
                 </div>
             </section>
-            <section>
+            <section v-if="!isPageLoading">
                 <h3 class="text-lg font-semibold text-emerald-600 mb-4">Thống kê số lượng theo tôn giáo</h3>
                 <div class="bg-white rounded-xl shadow p-4 border border-gray-100 overflow-x-auto">
                     <table class="w-full min-w-[400px] border-collapse text-xs md:text-sm">
@@ -63,7 +64,7 @@
                     </table>
                 </div>
             </section>
-            <section>
+            <section v-if="!isPageLoading">
                 <h3 class="text-lg font-semibold text-emerald-600 mb-4">
                     Thống kê số lượng nam nữ theo trách vụ trong từng ngành
                 </h3>
@@ -121,6 +122,9 @@ import { RoleStatisticsDto, ReligionStatisticsDto, ResponsibilityStatisticsDto }
 import { ref, onMounted, nextTick } from "vue";
 import { getAllDeanery } from "@/services/deaneryService";
 import { DeaneryDto } from "@/types/deanery.type";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
+
+const isPageLoading = ref(true);
 
 const stats = ref<RoleStatisticsDto[]>([]);
 const religionStats = ref<ReligionStatisticsDto[]>([]);
@@ -180,7 +184,11 @@ async function fetchResponsibilities(deaneryId: number) {
     }
 }
 
-onMounted(() => {
-    fetchDeaneries();
+onMounted(async () => {
+    try {
+        await fetchDeaneries();
+    } finally {
+        isPageLoading.value = false;
+    }
 });
 </script>

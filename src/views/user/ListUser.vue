@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col h-screen">
+    <div class="flex flex-col h-full">
         <div class="flex items-center justify-between px-4 md:px-6 pt-6 mb-4">
             <h2 class="text-lg md:text-xl font-semibold text-emerald-700">
                 Danh sách người dùng
@@ -26,6 +26,7 @@
             </div>
         </div>
         <div class="flex-1 overflow-auto px-4 md:px-6 pb-6">
+            <LoadingScreen v-if="isPageLoading" />
             <div class="bg-white rounded-lg shadow">
                 <div class="overflow-x-auto">
                     <table class="min-w-full border-collapse">
@@ -91,7 +92,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div v-if="filteredUsers.length === 0" class="text-center text-gray-500 py-4">
+                <div v-if="filteredUsers.length === 0 && !isPageLoading" class="text-center text-gray-500 py-4">
                     {{ searchQuery ? 'Không tìm thấy kết quả phù hợp.' : 'Chưa có người dùng nào.' }}
                 </div>
             </div>
@@ -105,8 +106,10 @@ import { UserDto } from "@/types/user.type";
 import { deleteUser, getAllUser } from "@/services/userService";
 import { parseJwt } from "@/utils/jwt.util";
 import { getLS } from "@/tools/localStorage.tool";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const users = ref<UserDto[]>([]);
+const isPageLoading = ref(true);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
 const searchQuery = ref("");
@@ -171,8 +174,9 @@ async function confirmDelete() {
     }
 }
 
-onMounted(() => {
-    fetchUsers();
+onMounted(async () => {
+    await fetchUsers();
+    isPageLoading.value = false;
 });
 </script>
 

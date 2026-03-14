@@ -2,7 +2,8 @@
     <div class="flex flex-col h-full overflow-y-auto">
         <div class="max-w-4xl mx-auto w-full p-6 flex-1 flex flex-col">
             <h2 class="text-xl font-semibold mb-4 text-emerald-700">Cập nhật người dùng</h2>
-            <form class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
+            <LoadingScreen v-if="isPageLoading" />
+            <form v-else class="space-y-4 flex-1 flex flex-col" @submit.prevent="handleSubmit">
                 <div class="flex-1 overflow-y-auto space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -88,6 +89,7 @@ import { UserUpdateRequest, ValidationErrorUser } from "@/types/user.type";
 import { getUserById, updateUser } from "@/services/userService";
 import { ApiResponse } from "@/types/api.type";
 import LoadingButton from "@/components/common/LoadingButton.vue";
+import LoadingScreen from "@/components/common/LoadingScreen.vue";
 
 const errors = ref<ValidationErrorUser>({});
 const route = useRoute();
@@ -95,6 +97,7 @@ const router = useRouter();
 const memberId = Number(route.params.memberId);
 const { toast, showToast } = useToast();
 const { isLoading, withLoading } = useLoading();
+const isPageLoading = ref(true);
 const genders = ref<GenderDto[]>([]);
 const roles = ref<RoleDto[]>([]);
 
@@ -125,6 +128,8 @@ onMounted(async () => {
         console.log(`roles`, roles.value);
     } catch (err: any) {
     showToast(err.message, "error");
+} finally {
+    isPageLoading.value = false;
 }
 });
 
