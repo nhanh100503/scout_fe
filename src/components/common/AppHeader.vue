@@ -1,5 +1,8 @@
 <template>
-    <header class="fixed top-0 inset-x-0 z-40 bg-white border-b border-gray-200/70 shadow-sm h-16">
+    <header 
+        class="fixed top-0 inset-x-0 z-40 bg-white border-b border-gray-200/70 shadow-sm h-16 transition-[padding] duration-300 ease-in-out"
+        :class="isCollapsed ? 'md:pl-20' : 'md:pl-64'"
+    >
         <div class="h-full flex items-center justify-between px-4 md:px-6">
             <div class="flex items-center gap-3">
                 <button
@@ -9,7 +12,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
-                <a href="#" class="flex items-center gap-2">
+                <a href="#" class="md:hidden flex items-center gap-2">
                     <div
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-white shadow">
                         <span class="font-bold">FM</span>
@@ -114,6 +117,7 @@ import { useAuth } from "@/composables/useAuth";
 import { useRouter } from "vue-router";
 import defaultAvatarImg from "@/assets/avatar.png";
 
+defineProps<{ isCollapsed?: boolean }>();
 defineEmits<{ (e: 'toggle-sidebar'): void }>();
 
 const { currentMember, clearMember } = useAuth();
