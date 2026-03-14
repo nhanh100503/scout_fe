@@ -27,7 +27,7 @@
         </div>
         <div class="flex-1 overflow-auto px-4 md:px-6 pb-6">
             <LoadingScreen v-if="isPageLoading" />
-            <div class="bg-white rounded-lg shadow">
+            <div v-else class="bg-white rounded-lg shadow">
                 <div class="overflow-x-auto">
                     <table class="min-w-full border-collapse">
                         <thead class="bg-gray-100 sticky top-0 z-10">

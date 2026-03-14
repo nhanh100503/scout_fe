@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen bg-gray-50 text-gray-800 pt-16 pb-16">
-        <AppHeader @toggle-sidebar="isSidebarOpen = !isSidebarOpen" />
+        <AppHeader @toggle-sidebar="isSidebarOpen = !isSidebarOpen" :is-collapsed="isSidebarCollapsed" />
         <div class="flex">
             <AppSidebar 
                 :is-open="isSidebarOpen" 

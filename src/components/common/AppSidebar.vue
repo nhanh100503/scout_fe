@@ -125,7 +125,7 @@
                 class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors"
                 title="Nhấn phím '.' để thu gọn/mở rộng"
              >
-                 <span v-if="!isCollapsed">Thu gọn (.)</span>
+                 <span v-if="!isCollapsed">Thu gọn <<</span>
                  <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                  </svg>
