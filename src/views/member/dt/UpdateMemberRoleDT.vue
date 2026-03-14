@@ -241,9 +241,9 @@
                     </div>
                 </div>
                 <div class="pt-4">
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">
+                    <LoadingButton :loading="isLoading" loading-text="Đang cập nhật..." base-class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 inline-flex items-center justify-center transition-opacity duration-200">
                         Cập nhật đạo trưởng
-                    </button>
+                    </LoadingButton>
                 </div>
             </form>
         </div>
@@ -273,13 +273,16 @@ import { ResponsibilityDto } from "@/types/responsibility.type";
 import { GenderDto } from "@/types/gender.type";
 import { ApiResponse } from "@/types/api.type";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { inputClass } from "@/utils/inputClass";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const errors = ref<ValidationErrorMember>({});
 const route = useRoute();
 const router = useRouter();
 const memberId = Number(route.params.memberId);
 const { toast, showToast } = useToast();
+const { isLoading, withLoading } = useLoading();
 
 const deaneries = ref<DeaneryDto[]>([]);
 const parishes = ref<ParishDto[]>([]);
@@ -484,26 +487,28 @@ async function handleSubmit() {
         }
     }
 
-    try {
-        const payload = {
-            ...form.value,
-            majors: form.value.majors ? form.value.majors.map(m => ({
-                majorId: m.majorId,
-                name: m.name,
-                now: m.now
-            })) : []
-        };
+    await withLoading(async () => {
+        try {
+            const payload = {
+                ...form.value,
+                majors: form.value.majors ? form.value.majors.map(m => ({
+                    majorId: m.majorId,
+                    name: m.name,
+                    now: m.now
+                })) : []
+            };
 
-        const res = await updateMemberRoleDT(memberId, payload);
-        if (res.code === 200) {
-            showToast(res.message, "success");
-            router.push("/members/dt");
+            const res = await updateMemberRoleDT(memberId, payload);
+            if (res.code === 200) {
+                showToast(res.message, "success");
+                router.push("/members/dt");
+            }
+        } catch (error: any) {
+            if (error.code === 400 && error.data) {
+                errors.value = error.data as ValidationErrorMember;
+            }
+            showToast(error.message || "Cập nhật thất bại", "error");
         }
-    } catch (error: any) {
-        if (error.code === 400 && error.data) {
-            errors.value = error.data as ValidationErrorMember;
-        }
-        showToast(error.message || "Cập nhật thất bại", "error");
-    }
+    });
 }
 </script>

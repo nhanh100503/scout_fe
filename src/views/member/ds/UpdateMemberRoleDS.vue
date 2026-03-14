@@ -48,9 +48,9 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Đoàn <span class="text-red-500">*
                                 </span></label>
-                            <input v-model="form.team" type="text" :class="inputClass(errors.team)" />
-                            <p v-if="errors.team" class="mt-1 text-xs text-red-500 break-words">
-                                {{ errors.team }}
+                            <input v-model="form.teamId" type="text" :class="inputClass(errors.teamId)" />
+                            <p v-if="errors.teamId" class="mt-1 text-xs text-red-500 break-words">
+                                {{ errors.teamId }}
                             </p>
                         </div>
                     </div>
@@ -176,9 +176,9 @@
                     </div>
 
                 <div class="pt-4">
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700">
+                    <LoadingButton :loading="isLoading" loading-text="Đang cập nhật..." base-class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 inline-flex items-center justify-center transition-opacity duration-200">
                         Cập nhật đoàn sinh
-                    </button>
+                    </LoadingButton>
                 </div>
             </form>
         </div>
@@ -206,7 +206,9 @@ import { ResponsibilityDto } from "@/types/responsibility.type";
 import { GenderDto } from "@/types/gender.type";
 import { ApiResponse } from "@/types/api.type";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { inputClass } from "@/utils/inputClass";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -220,7 +222,7 @@ const form = ref<MemberRoleDSUpdateRequest>({
     pledgeYear: "",
     parishId: null,
     federationId: null,
-    team: "",
+    teamId: 0,
     deaneryId: null,
     genderId: null,
     roleId: 1,
@@ -240,6 +242,7 @@ const errors = ref<ValidationErrorMember>({});
 const selectedPastMajors = ref<number[]>([]);
 const currentMajorId = ref<number | "">("");
 const { toast, showToast } = useToast();
+const { isLoading, withLoading } = useLoading();
 
 onMounted(async () => {
     try {
@@ -273,7 +276,7 @@ onMounted(async () => {
                 pledgeYear: m.pledgeYear,
                 parishId: m.parishId || null,
                 federationId: m.federationId || null,
-                team: m.team,
+                teamId: m.teamId,
                 deaneryId: m.deaneryId || null,
                 genderId: m.gender?.genderId || null,
                 religionId: m.religion?.religionId || null,
@@ -401,26 +404,28 @@ async function handleSubmit() {
         return;
     }
 
-    try {
-        const payload = {
-            ...form.value,
-            majors: form.value.majors.map(m => ({
-                majorId: m.majorId,
-                name: m.name, 
-                now: m.now
-            }))
-        };
+    await withLoading(async () => {
+        try {
+            const payload = {
+                ...form.value,
+                majors: form.value.majors.map(m => ({
+                    majorId: m.majorId,
+                    name: m.name, 
+                    now: m.now
+                }))
+            };
 
-        const res = await updateMemberRoleDS(memberId, payload);
-        if (res.code === 200) {
-            showToast(res.message, "success");
-            router.push("/members/ds");
+            const res = await updateMemberRoleDS(memberId, payload);
+            if (res.code === 200) {
+                showToast(res.message, "success");
+                router.push("/members/ds");
+            }
+        } catch (error: any) {
+            if (error.code === 400 && error.data) {
+                errors.value = error.data as ValidationErrorMember;
+            }
+            showToast(error.message || "Cập nhật thất bại", "error");
         }
-    } catch (error: any) {
-        if (error.code === 400 && error.data) {
-            errors.value = error.data as ValidationErrorMember;
-        }
-        showToast(error.message || "Cập nhật thất bại", "error");
-    }
+    });
 }
 </script>

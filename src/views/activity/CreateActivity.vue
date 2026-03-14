@@ -170,10 +170,9 @@
                         <router-link to="/activities" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm">
                             Hủy
                         </router-link>
-                        <button type="submit"
-                            class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 text-sm">
+                        <LoadingButton :loading="isLoading" loading-text="Đang lưu..." base-class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 text-sm inline-flex items-center justify-center transition-opacity duration-200">
                             Lưu sinh hoạt
-                        </button>
+                        </LoadingButton>
                     </div>
                 </div>
             </form>
@@ -185,6 +184,7 @@
 import { ref, onMounted, watch } from "vue";
 import router from "@/routers";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { useAuth } from "@/composables/useAuth";
 import { inputClass } from "@/utils/inputClass";
 import type { ApiResponse } from "@/types/api.type";
@@ -198,6 +198,7 @@ import type { DeaneryDto } from "@/types/deanery.type";
 import type { ParishDto } from "@/types/parish.type";
 import type { MajorDto } from "@/types/major.type";
 import type { TeamDto } from "@/types/team.type";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const activityTypeOptions = [
     { value: 'DEANERY' as ActivityType, label: 'Cấp Châu', icon: '🏛️' },
@@ -224,6 +225,7 @@ const parishes = ref<ParishDto[]>([]);
 const majors = ref<MajorDto[]>([]);
 const teams = ref<TeamDto[]>([]);
 const { showToast } = useToast();
+const { isLoading, withLoading } = useLoading();
 const { canModifyActivity, canSelectDeanery, currentMember } = useAuth();
 
 // Initialize 10 empty plan rows
@@ -336,28 +338,29 @@ async function onDeaneryChange() {
 
 async function handleSubmit() {
     errors.value = {};
-    try {
-        // Filter out empty plan rows
-        const filledRows = planRows.value.filter(
-            r => r.startTime || r.content || r.pic || r.materials || r.notes
-        );
+    await withLoading(async () => {
+        try {
+            const filledRows = planRows.value.filter(
+                r => r.startTime || r.content || r.pic || r.materials || r.notes
+            );
 
-        const payload: ActivityCreateRequest = {
-            ...form.value,
-            planRows: filledRows.length > 0 ? filledRows : undefined,
-        };
+            const payload: ActivityCreateRequest = {
+                ...form.value,
+                planRows: filledRows.length > 0 ? filledRows : undefined,
+            };
 
-        const res: ApiResponse<any> = await createActivity(payload);
-        if (res.code === 200) {
-            showToast(res.message, "success");
-            router.push("/activities");
+            const res: ApiResponse<any> = await createActivity(payload);
+            if (res.code === 200) {
+                showToast(res.message, "success");
+                router.push("/activities");
+            }
+        } catch (error: any) {
+            const apiRes: ApiResponse<any> = error;
+            if (apiRes.code === 400 && apiRes.data) {
+                errors.value = apiRes.data as ValidationErrorActivity;
+            }
+            showToast(apiRes.message, "error");
         }
-    } catch (error: any) {
-        const apiRes: ApiResponse<any> = error;
-        if (apiRes.code === 400 && apiRes.data) {
-            errors.value = apiRes.data as ValidationErrorActivity;
-        }
-        showToast(apiRes.message, "error");
-    }
+    });
 }
 </script>

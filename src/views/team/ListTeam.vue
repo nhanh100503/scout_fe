@@ -22,8 +22,14 @@
                 <div class="flex justify-center gap-6">
                     <button @click="showConfirm = false"
                         class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Hủy</button>
-                    <button @click="confirmDelete" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Chắc
-                        chắn</button>
+                    <LoadingButton
+                        type="button"
+                        :loading="isDeleting"
+                        loading-text="Đang xóa..."
+                        base-class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 inline-flex items-center justify-center transition-opacity duration-200"
+                        @click="confirmDelete">
+                        Chắc chắn
+                    </LoadingButton>
                 </div>
             </div>
         </div>
@@ -193,13 +199,16 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { useAuth } from "@/composables/useAuth";
 import { getAllTeams, deleteTeam, getTeamById } from "@/services/teamService";
 import { getAllMembers, updateMemberTeam } from "@/services/memberService";
 import type { MemberDto } from "@/types/member.type";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const teams = ref<any[]>([]);
 const loading = ref(false);
+const isDeleting = ref(false);
 const showConfirm = ref(false);
 const deleteId = ref<number | null>(null);
 const searchQuery = ref("");
@@ -267,15 +276,19 @@ function openConfirm(teamId: number) {
 
 async function confirmDelete() {
     if (!deleteId.value) return;
-    showConfirm.value = false;
+    isDeleting.value = true;
     try {
         const res = await deleteTeam(deleteId.value);
         if (res.code === 200) {
+            showConfirm.value = false;
             showToast(res.message, "success");
             await fetchTeams();
         }
     } catch (error: any) {
         showToast(error.message || "Xóa thất bại", "error");
+    } finally {
+        isDeleting.value = false;
+        showConfirm.value = false;
     }
 }
 

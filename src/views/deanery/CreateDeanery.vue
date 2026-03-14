@@ -18,10 +18,9 @@
                                 class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm">
                                 Hủy
                             </router-link>
-                            <button type="submit"
-                                class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 text-sm">
+                            <LoadingButton :loading="isLoading" loading-text="Đang lưu...">
                                 Lưu châu
-                            </button>
+                            </LoadingButton>
                         </div>
                     </div>
                 </div>
@@ -35,29 +34,34 @@
 import { ref } from "vue";
 import router from "@/routers";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { inputClass } from "@/utils/inputClass";
 import type { ApiResponse } from "@/types/api.type";
 import { DeaneryCreateRequest, ValidationErrorDeanery } from "@/types/deanery.type";
 import { createDeanery } from "@/services/deaneryService";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const form = ref<DeaneryCreateRequest>({ name: "" });
 const errors = ref<ValidationErrorDeanery>({});
 const { showToast } = useToast();
+const { isLoading, withLoading } = useLoading();
 
 async function handleSubmit() {
     errors.value = {};
-    try {
-        const res = await createDeanery(form.value);
-        if (res.code === 201) {
-            showToast(res.message, "success");
-            router.push("/deaneries");
+    await withLoading(async () => {
+        try {
+            const res = await createDeanery(form.value);
+            if (res.code === 201) {
+                showToast(res.message, "success");
+                router.push("/deaneries");
+            }
+        } catch (error: any) {
+            const apiRes: ApiResponse<any> = error;
+            if (apiRes.code === 400 && apiRes.data) {
+                errors.value = apiRes.data as ValidationErrorDeanery;
+            }
+            showToast(apiRes.message, "error");
         }
-    } catch (error: any) {
-        const apiRes: ApiResponse<any> = error;
-        if (apiRes.code === 400 && apiRes.data) {
-            errors.value = apiRes.data as ValidationErrorDeanery;
-        }
-        showToast(apiRes.message, "error");
-    }
+    });
 }
 </script>

@@ -47,9 +47,9 @@
                     <button type="button" @click="$router.push('/teams')" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
                         Hủy
                     </button>
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 shadow-sm" :disabled="loading">
-                        {{ loading ? 'Đang lưu...' : 'Lưu đội/nhóm' }}
-                    </button>
+                    <LoadingButton :loading="isLoading" loading-text="Đang lưu..." base-class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 shadow-sm inline-flex items-center justify-center transition-opacity duration-200">
+                        Lưu đội/nhóm
+                    </LoadingButton>
                 </div>
             </form>
         </div>
@@ -60,6 +60,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { inputClass } from "@/utils/inputClass";
 import { getAllDeanery } from "@/services/deaneryService";
 import { getParishesByDeaneryId } from "@/services/parishService";
@@ -69,10 +70,11 @@ import { TeamCreateRequest } from "@/types/team.type";
 import { DeaneryDto } from "@/types/deanery.type";
 import { ParishDto } from "@/types/parish.type";
 import { MajorDto } from "@/types/major.type";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const router = useRouter();
 const { showToast } = useToast();
-const loading = ref(false);
+const { isLoading, withLoading } = useLoading();
 const errors = ref<any>({});
 
 const deaneryId = ref<number | null>(null);
@@ -119,20 +121,19 @@ async function handleSubmit() {
 
     if (Object.keys(errors.value).length > 0) return;
 
-    loading.value = true;
-    try {
-        const res = await createTeam(form.value);
-        if (res.code === 201) {
-            showToast(res.message, "success");
-            router.push("/teams");
+    await withLoading(async () => {
+        try {
+            const res = await createTeam(form.value);
+            if (res.code === 201) {
+                showToast(res.message, "success");
+                router.push("/teams");
+            }
+        } catch (error: any) {
+            if (error.code === 400 && error.data) {
+                errors.value = error.data;
+            }
+            showToast(error.message || "Tạo thất bại", "error");
         }
-    } catch (error: any) {
-        if (error.code === 400 && error.data) {
-            errors.value = error.data;
-        }
-        showToast(error.message || "Tạo thất bại", "error");
-    } finally {
-        loading.value = false;
-    }
+    });
 }
 </script>

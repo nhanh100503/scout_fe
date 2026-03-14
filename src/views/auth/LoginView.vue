@@ -47,10 +47,12 @@
                                 {{ errors.password }}
                             </p>
                         </div>
-                        <button type="submit"
-                            class="w-full py-2 px-4 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <LoadingButton
+                            :loading="isLoading"
+                            loading-text="Đang đăng nhập..."
+                            base-class="w-full py-2 px-4 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 inline-flex items-center justify-center transition-opacity duration-200">
                             Đăng nhập
-                        </button>
+                        </LoadingButton>
                     </form>
                 </div>
             </div>
@@ -61,6 +63,7 @@
 <script setup lang="ts">
 import { useAuth } from "@/composables/useAuth";
 import { useToast } from "@/composables/useToast";
+import { useLoading } from "@/composables/useLoading";
 import { getCurrentMember, login } from "@/services/authService";
 import { setLS } from "@/tools/localStorage.tool";
 import { ApiResponse } from "@/types/api.type";
@@ -68,9 +71,11 @@ import { AuthLoginRequest, ValidationLoginErrors } from "@/types/auth.type";
 import { inputClass } from "@/utils/inputClass";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import LoadingButton from "@/components/common/LoadingButton.vue";
 
 const { setMember } = useAuth();
 const router = useRouter();
+const { isLoading, withLoading } = useLoading();
 
 const email = ref('');
 const password = ref('');
@@ -85,23 +90,25 @@ function togglePassword() {
 
 async function handleLogin() {
     errors.value = {};
-    try {
-        const payload: AuthLoginRequest = { email: email.value, password: password.value };
-        const res = await login(payload);
-        if (res.code === 200) {
-            accessToken.value = res.data.accessToken;
-            setLS("accessToken", accessToken.value);
-            const userRes = await getCurrentMember();
-            setMember(userRes.data);
-            showToast(res.message, "success");
-            router.push("/");
+    await withLoading(async () => {
+        try {
+            const payload: AuthLoginRequest = { email: email.value, password: password.value };
+            const res = await login(payload);
+            if (res.code === 200) {
+                accessToken.value = res.data.accessToken;
+                setLS("accessToken", accessToken.value);
+                const userRes = await getCurrentMember();
+                setMember(userRes.data);
+                showToast(res.message, "success");
+                router.push("/");
+            }
+        } catch (error: any) {
+            const apiRes: ApiResponse<any> = error;
+            if (apiRes.code === 400 && apiRes.data) {
+                errors.value = apiRes.data as ValidationLoginErrors;
+            }
+            showToast(apiRes.message, "error");
         }
-    } catch (error: any) {
-        const apiRes: ApiResponse<any> = error;
-        if (apiRes.code === 400 && apiRes.data) {
-            errors.value = apiRes.data as ValidationLoginErrors;
-        }
-        showToast(apiRes.message, "error");
-    }
+    });
 }
 </script>
